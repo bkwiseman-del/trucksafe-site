@@ -1,5 +1,6 @@
 // Trucksafe Platform Database Schema
 // Based on README.md architecture
+// Last updated: February 2026
 
 generator client {
   provider = "prisma-client-js"
@@ -19,31 +20,63 @@ model User {
   email         String    @unique
   emailVerified DateTime?
   name          String?
-  password      String? // Hashed password for credentials auth
+  password      String?   // Hashed password for credentials auth
   image         String?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
-  // Relations
+  // FreshBooks / Billing
+  freshbooksClientId    String?   // FreshBooks client ID once linked
+  isFreshbooksClient    Boolean   @default(false)
+  isBillingOnly         Boolean   @default(false)  // internal FB clients (e.g. staff)
+  portalAccess          Boolean   @default(false)  // grants access to /portal
+
+  // Mailchimp
+  emailSubscribed       Boolean   @default(true)
+  lastActiveAt          DateTime?
+
+  // Relations - Auth
   profile              Profile?
   accounts             Account[]
   sessions             Session[]
   roles                UserRole[]
   badges               UserBadge[]
-  subscription         Subscription?
   privacySettings      PrivacySettings?
   notificationSettings NotificationPreferences?
+
+  // Relations - Subscriptions
+  subscription         Subscription?
+
+  // Relations - Network
   posts                Post[]
   comments             Comment[]
   reactions            Reaction[]
   messages             Message[]
+  userMedia            UserMedia[]
+
+  // Relations - Content
   articles             Article[]
+
+  // Relations - Events
   eventRegistrations   EventRegistration[]
   bootcampAttendee     BootcampAttendee[]
-  clientRecord         Client?                  @relation(fields: [clientId], references: [id])
+
+  // Relations - Client Portal (legacy)
+  clientRecord         Client?
   consultingHours      ConsultingHours[]
-  userMedia            UserMedia[]
-  clientId             String?
+
+  // Relations - FreshBooks Billing
+  consultingHoursCache ConsultingHoursCache?
+  invoiceCache         InvoiceCache[]
+  billingHistory       BillingHistory[]
+  freshbooksReview     FreshbooksClientReview?
+
+  // Relations - Thinkific
+  thinkificUser        ThinkificUser?
+
+  // Relations - Client Portal (new)
+  clientPortalConfig   ClientPortalConfig?
+  clientDocuments      ClientDocument[]
 
   @@index([email])
 }
@@ -107,8 +140,8 @@ model Profile {
 model UserRole {
   id        String   @id @default(cuid())
   userId    String
-  role      String // NETWORK_MEMBER, COMPLIANCE_BASIC, COMPLIANCE_PRO, COMPLIANCE_PREMIUM, CLIENT, TSC_CERTIFIED, BOOTCAMP_ATTENDEE, BOOTCAMP_ALUMNI
-  metadata  Json? // For storing role-specific data (e.g., bootcamp year, certification date)
+  role      String   // NETWORK_MEMBER, COMPLIANCE_BASIC, COMPLIANCE_PRO, COMPLIANCE_PREMIUM, CLIENT, TSC_CERTIFIED, BOOTCAMP_ATTENDEE, BOOTCAMP_ALUMNI
+  metadata  Json?    // For storing role-specific data (e.g., bootcamp year, certification date)
   createdAt DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -123,7 +156,7 @@ model Badge {
   slug        String   @unique
   name        String
   description String
-  icon        String // Emoji or icon identifier
+  icon        String   // Emoji or icon identifier
   priority    Int      @default(10) // Lower = higher priority for display
   createdAt   DateTime @default(now())
 
@@ -189,9 +222,9 @@ model SubscriptionTier {
   id            String   @id @default(cuid())
   name          String   @unique // BASIC, PRO, PREMIUM
   displayName   String
-  price         Int // Price in cents
-  interval      String // monthly, yearly
-  features      Json // Array of features
+  price         Int      // Price in cents
+  interval      String   // monthly, yearly
+  features      Json     // Array of features
   stripePriceId String   @unique
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
@@ -207,7 +240,7 @@ model Subscription {
   tierId               String
   stripeCustomerId     String   @unique
   stripeSubscriptionId String   @unique
-  status               String // active, canceled, past_due, trialing
+  status               String   // active, canceled, past_due, trialing
   currentPeriodStart   DateTime
   currentPeriodEnd     DateTime
   cancelAtPeriodEnd    Boolean  @default(false)
@@ -227,9 +260,9 @@ model PaymentHistory {
   id              String   @id @default(cuid())
   userId          String
   stripePaymentId String   @unique
-  amount          Int // Amount in cents
+  amount          Int      // Amount in cents
   currency        String   @default("usd")
-  status          String // succeeded, failed, pending
+  status          String   // succeeded, failed, pending
   description     String?
   createdAt       DateTime @default(now())
 
@@ -242,12 +275,12 @@ model Invoice {
   userId         String
   freshbooksId   String    @unique
   invoiceNumber  String
-  amount         Int // Amount in cents
-  status         String // draft, sent, viewed, paid, overdue
+  amount         Int       // Amount in cents
+  status         String    // draft, sent, viewed, paid, overdue
   dueDate        DateTime
   paidDate       DateTime?
   description    String?   @db.Text
-  freshbooksData Json? // Store full Freshbooks invoice data
+  freshbooksData Json?     // Store full Freshbooks invoice data
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
 
@@ -259,10 +292,10 @@ model Invoice {
 model ConsultingHours {
   id             String   @id @default(cuid())
   userId         String
-  quarterYear    String // e.g., "2026-Q1"
-  hoursAllotted  Float // 2.0 for Pro, 5.0 for Premium
+  quarterYear    String   // e.g., "2026-Q1"
+  hoursAllotted  Float    // 2.0 for Pro, 5.0 for Premium
   hoursUsed      Float    @default(0)
-  freshbooksData Json? // Time entry tracking from Freshbooks
+  freshbooksData Json?    // Time entry tracking from Freshbooks
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
@@ -270,6 +303,130 @@ model ConsultingHours {
 
   @@unique([userId, quarterYear])
   @@index([userId])
+}
+
+// ============================================
+// FRESHBOOKS & BILLING INTEGRATION
+// Added: February 2026
+// ============================================
+
+// Caches FreshBooks time entries bucketed by quarter for consulting hours display
+model ConsultingHoursCache {
+  id            String   @id @default(cuid())
+  userId        String   @unique
+  hoursUsedQ1   Float    @default(0)
+  hoursUsedQ2   Float    @default(0)
+  hoursUsedQ3   Float    @default(0)
+  hoursUsedQ4   Float    @default(0)
+  currentYear   Int
+  lastSyncedAt  DateTime
+  updatedAt     DateTime @updatedAt
+
+  user          User     @relation(fields: [userId], references: [id])
+}
+
+// Caches FreshBooks invoices for the billing portal
+model InvoiceCache {
+  id                  String    @id @default(cuid())
+  userId              String
+  freshbooksInvoiceId String    @unique
+  invoiceNumber       String
+  amount              Float
+  currency            String    @default("USD")
+  status              String    // draft | sent | viewed | paid | overdue
+  dueDate             DateTime?
+  paidDate            DateTime?
+  description         String?
+  freshbooksUrl       String?   // hosted payment URL (requires Advanced Payments)
+  lastSyncedAt        DateTime
+
+  user                User      @relation(fields: [userId], references: [id])
+}
+
+// Unified billing history from both Stripe and FreshBooks
+// Synced nightly — single source of truth for /portal/billing
+model BillingHistory {
+  id            String    @id @default(cuid())
+  userId        String
+
+  // Source tracking (internal only — never exposed to client)
+  source        String    // 'stripe' | 'freshbooks'
+  sourceId      String    // Stripe payment intent ID or FreshBooks invoice ID
+
+  // Display fields
+  category      String    // 'subscription' | 'consulting' | 'shop'
+  description   String
+  amount        Float
+  currency      String    @default("USD")
+  status        String    // 'paid' | 'unpaid' | 'overdue' | 'draft' | 'refunded'
+  invoiceDate   DateTime
+  dueDate       DateTime?
+  paidDate      DateTime?
+
+  // Action URLs
+  paymentUrl    String?   // FreshBooks payment link (unpaid FB invoices only)
+  pdfUrl        String?   // Stripe: invoice_pdf URL | FreshBooks: proxied via our API
+  receiptUrl    String?   // Stripe receipt URL (paid Stripe charges)
+
+  lastSyncedAt  DateTime
+
+  user          User      @relation(fields: [userId], references: [id])
+
+  @@unique([source, sourceId])
+}
+
+// Admin review queue for FreshBooks clients with no matching platform account
+model FreshbooksClientQueue {
+  id                  String    @id @default(cuid())
+  freshbooksClientId  String    @unique
+  freshbooksEmail     String
+  freshbooksName      String
+  freshbooksCompany   String?
+  isBillingOnly       Boolean   @default(false)
+  existingUserId      String?
+  status              String    @default("pending") // pending | approved | dismissed
+  reviewedAt          DateTime?
+  reviewedBy          String?
+  createdAt           DateTime  @default(now())
+}
+
+// Flags ambiguous FreshBooks matches (name match only, no email match)
+model FreshbooksClientReview {
+  id                    String    @id @default(cuid())
+  userId                String    @unique
+  suggestedFreshbooksId String
+  matchReason           String    // 'name_match'
+  matchedName           String
+  status                String    @default("pending") // pending | confirmed | dismissed
+  reviewedAt            DateTime?
+  reviewedBy            String?
+  createdAt             DateTime  @default(now())
+
+  user                  User      @relation(fields: [userId], references: [id])
+}
+
+// Logs all FreshBooks sync job results for monitoring
+model FreshbooksSync {
+  id        String   @id @default(cuid())
+  userId    String
+  syncType  String   // 'hours' | 'invoices' | 'billing_history'
+  status    String   // 'success' | 'error'
+  error     String?
+  syncedAt  DateTime @default(now())
+}
+
+// General-purpose admin notification system
+model AdminNotification {
+  id          String    @id @default(cuid())
+  type        String    // 'freshbooks_client_queue' | 'freshbooks_review' | 'sync_failure'
+  title       String
+  body        String
+  linkUrl     String?
+  referenceId String?
+  status      String    @default("unread") // unread | read | actioned
+  emailSent   Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  readAt      DateTime?
 }
 
 // ============================================
@@ -349,7 +506,7 @@ model Comment {
 
 model Reaction {
   id        String   @id @default(cuid())
-  type      String // like, helpful, love
+  type      String   // like, helpful, love
   userId    String
   postId    String?
   commentId String?
@@ -398,8 +555,8 @@ model UserMedia {
   userId        String
   filename      String
   fileUrl       String
-  fileType      String // image, video, document
-  fileSize      Int // bytes
+  fileType      String    // image, video, document
+  fileSize      Int       // bytes
   uploadedAt    DateTime  @default(now())
   retentionDate DateTime? // When user-uploaded media will be purged
 
@@ -407,6 +564,53 @@ model UserMedia {
 
   @@index([userId])
   @@index([retentionDate])
+}
+
+// ============================================
+// THINKIFIC ACADEMY INTEGRATION
+// Added: February 2026
+// ============================================
+
+// Represents anyone who exists in Thinkific, regardless of Trucksafe account
+model ThinkificUser {
+  id                  String    @id @default(cuid())
+  thinkificId         Int       @unique
+  email               String    @unique
+  firstName           String?
+  lastName            String?
+  createdInThinkific  DateTime?
+  lastSyncedAt        DateTime?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  // Nullable: null until user explicitly links accounts
+  trucksafeUserId     String?   @unique
+  trucksafeUser       User?     @relation(fields: [trucksafeUserId], references: [id])
+
+  enrollments         ThinkificEnrollment[]
+}
+
+model ThinkificEnrollment {
+  id                  String    @id @default(cuid())
+  thinkificUserId     String
+  thinkificEnrollId   Int       @unique
+  courseId            Int
+  courseName          String
+  percentageCompleted Float     @default(0)
+  activatedAt         DateTime?
+  startedAt           DateTime?
+  completedAt         DateTime?
+  expiryDate          DateTime?
+  certificateUrl      String?   // Only populated on enrollment.completed webhook
+  freeTrial           Boolean   @default(false)
+  lastWebhookAt       DateTime?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  thinkificUser       ThinkificUser @relation(fields: [thinkificUserId], references: [id])
+
+  @@index([thinkificUserId])
+  @@index([courseId])
 }
 
 // ============================================
@@ -474,10 +678,10 @@ model Video {
   youtubeId       String   @unique
   description     String?  @db.Text
   transcript      String?  @db.Text
-  duration        Int? // seconds
+  duration        Int?     // seconds
   publishedAt     DateTime
   viewCount       Int      @default(0)
-  specialGuests   Json? // Array of guest objects {name, company, bio, photo}
+  specialGuests   Json?    // Array of guest objects {name, company, bio, photo}
   showNotesStatus String   @default("pending") // pending, draft, published
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
@@ -492,7 +696,7 @@ model Resource {
   title       String
   description String?  @db.Text
   fileUrl     String
-  fileType    String // pdf, video, document
+  fileType    String   // pdf, video, document
   category    String
   accessLevel String   @default("public") // public, basic, pro, premium
   downloads   Int      @default(0)
@@ -512,10 +716,10 @@ model Event {
   title           String
   slug            String    @unique
   description     String?   @db.Text
-  eventType       String // webinar, bootcamp, live_show, group_call
+  eventType       String    // webinar, bootcamp, live_show, group_call
   startDate       DateTime
   endDate         DateTime?
-  location        String? // Virtual, physical address, or URL
+  location        String?
   accessLevel     String    @default("public") // public, basic, pro, premium, registered
   maxAttendees    Int?
   registrationUrl String?
@@ -578,10 +782,10 @@ model BootcampEvent {
 model BootcampTicket {
   id          String   @id @default(cuid())
   eventId     String
-  name        String // Standard, Pro Member Discount, Premium Member Discount
-  price       Int // Price in cents
+  name        String   // Standard, Pro Member Discount, Premium Member Discount
+  price       Int      // Price in cents
   description String?  @db.Text
-  quantity    Int? // null = unlimited
+  quantity    Int?     // null = unlimited
   soldCount   Int      @default(0)
   createdAt   DateTime @default(now())
 
@@ -595,7 +799,7 @@ model BootcampAttendee {
   eventId         String
   userId          String
   ticketType      String
-  amountPaid      Int // Amount in cents
+  amountPaid      Int      // Amount in cents
   stripePaymentId String?
   checkInStatus   String   @default("registered") // registered, checked_in, no_show
   registeredAt    DateTime @default(now())
@@ -627,7 +831,7 @@ model BootcampRoom {
   eventId   String
   roomName  String
   capacity  Int
-  bookings  Json // Array of booking objects {userId, userName, checkInTime, checkOutTime}
+  bookings  Json     // Array of booking objects {userId, userName, checkInTime, checkOutTime}
   createdAt DateTime @default(now())
 
   event BootcampEvent @relation(fields: [eventId], references: [id], onDelete: Cascade)
@@ -636,7 +840,7 @@ model BootcampRoom {
 }
 
 // ============================================
-// CLIENT PORTAL
+// CLIENT PORTAL (LEGACY — kept for compatibility)
 // ============================================
 
 model Client {
@@ -651,25 +855,25 @@ model Client {
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
 
-  documents ClientDocument[]
+  documents ClientDocument_Legacy[]
   messages  ClientMessage[]
   audits    ClientAudit[]
-  User      User[]
+  user      User              @relation(fields: [userId], references: [id])
 
   @@index([userId])
   @@index([freshbooksId])
 }
 
-model ClientDocument {
+model ClientDocument_Legacy {
   id          String   @id @default(cuid())
   clientId    String
   title       String
   description String?  @db.Text
   fileUrl     String
   fileName    String
-  fileSize    Int // bytes
-  category    String // policy, compliance, audit, general
-  uploadedBy  String // user_id or "trucksafe"
+  fileSize    Int      // bytes
+  category    String   // policy, compliance, audit, general
+  uploadedBy  String   // user_id or "trucksafe"
   uploadedAt  DateTime @default(now())
 
   client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
@@ -681,7 +885,7 @@ model ClientDocument {
 model ClientMessage {
   id       String   @id @default(cuid())
   clientId String
-  senderId String // user_id or "trucksafe"
+  senderId String   // user_id or "trucksafe"
   subject  String
   content  String   @db.Text
   read     Boolean  @default(false)
@@ -712,6 +916,67 @@ model ClientAudit {
 }
 
 // ============================================
+// CLIENT PORTAL — DROPBOX INTEGRATION
+// Added: February 2026
+// ============================================
+
+enum SetupStatus {
+  NOT_NEEDED
+  PENDING
+  LINKED
+}
+
+enum DocumentDirection {
+  OUTBOUND  // Trucksafe → Client (staff placed in Client Portal Docs/)
+  INBOUND   // Client → Trucksafe (uploaded via portal, lands in Client Uploads/)
+}
+
+model ClientPortalConfig {
+  id                  String      @id @default(cuid())
+  userId              String      @unique
+
+  // FreshBooks
+  freshbooksClientId  String?
+  freshbooksStatus    SetupStatus @default(PENDING)
+
+  // Dropbox
+  dropboxFolderPath   String?     // e.g. /Trucksafe/Client Documents/ACIG
+  dropboxStatus       SetupStatus @default(PENDING)
+
+  // Portal access
+  portalAccess        Boolean     @default(false)
+  uploadsEnabled      Boolean     @default(false)
+  lastSyncedAt        DateTime?
+
+  createdAt           DateTime    @default(now())
+  updatedAt           DateTime    @updatedAt
+
+  user                User        @relation(fields: [userId], references: [id])
+  documents           ClientDocument[]
+}
+
+model ClientDocument {
+  id              String            @id @default(cuid())
+  userId          String
+  dropboxPath     String            // Full Dropbox path for downloads
+  dropboxFileId   String            @unique  // Stable Dropbox ID (survives renames)
+  fileName        String
+  fileSize        Int?              // Bytes
+  mimeType        String?
+  direction       DocumentDirection
+  seenByClient    Boolean           @default(false)
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  user            User              @relation(fields: [userId], references: [id], map: "ClientDocument_user_fkey")
+  config          ClientPortalConfig @relation(fields: [userId], references: [userId], map: "ClientDocument_config_fkey")
+
+  @@index([userId])
+  @@index([userId, direction])
+  @@index([dropboxFileId])
+}
+
+// ============================================
 // MEDIA LIBRARY (ADMIN)
 // ============================================
 
@@ -719,14 +984,14 @@ model Media {
   id           String   @id @default(cuid())
   filename     String
   fileUrl      String
-  fileType     String // image, video, document, audio
+  fileType     String   // image, video, document, audio
   mimeType     String
-  fileSize     Int // bytes
+  fileSize     Int      // bytes
   altText      String?
   caption      String?  @db.Text
-  uploadedBy   String // user_id
+  uploadedBy   String   // user_id
   category     String?
-  isPersistent Boolean  @default(false) // Trucksafe-uploaded = true, user-uploaded = false
+  isPersistent Boolean  @default(false)
   createdAt    DateTime @default(now())
 
   @@index([fileType])
