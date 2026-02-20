@@ -1,6 +1,7 @@
 import { DefaultSession } from 'next-auth'
 
 interface UserAccess {
+  isAdmin: boolean
   networkMember: boolean
   complianceMember?: {
     tier: 'basic' | 'pro' | 'premium'

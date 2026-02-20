@@ -3,6 +3,7 @@
 import { useSession } from 'next-auth/react'
 
 interface UserAccess {
+  isAdmin: boolean
   networkMember: boolean
   complianceMember?: {
     tier: 'basic' | 'pro' | 'premium'

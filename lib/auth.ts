@@ -9,6 +9,7 @@ function buildAccess(roles: { role: string; metadata: unknown }[]) {
   const roleNames = roles.map((r) => r.role)
 
   const access: any = {
+    isAdmin: roleNames.includes('ADMIN'),
     networkMember: roleNames.includes('NETWORK_MEMBER'),
   }
 
