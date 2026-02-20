@@ -16,7 +16,7 @@
 - [ ] YouTube API for Trucksafe LIVE! episodes + transcripts
 
 ## Core Features
-- [ ] Admin CMS (manage users, content, forums, etc.)
+- [x] Admin CMS (manage users, content, forums, etc.)
 - [ ] Client Portal (secure docs, billing, messaging)
 - [ ] Compliance+ subscription management
 - [ ] Academy course linking with Thinkific

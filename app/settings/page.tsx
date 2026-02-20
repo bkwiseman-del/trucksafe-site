@@ -2,9 +2,10 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Lock, Bell, Shield, AlertCircle, Check, Info } from 'lucide-react'
+import { Lock, Bell, Shield, AlertCircle, Check, Info, CreditCard, ArrowRight } from 'lucide-react'
 import Navigation from '@/components/Navigation'
 import Footer from '@/components/Footer'
+import Link from 'next/link'
 import { useUser } from '@/hooks/useUser'
 
 interface NotificationPrefs {
@@ -180,6 +181,25 @@ export default function SettingsPage() {
       <div className="pt-32 pb-20 px-6">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-3xl font-black text-gray-900 mb-8">Account Settings</h1>
+
+          {/* Billing Link */}
+          <Link
+            href="/settings/billing"
+            className="block bg-white rounded-xl border border-gray-200 p-6 mb-6 hover:border-[#dd8157] hover:shadow-md transition group"
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-[#dd8157]/10 rounded-lg flex items-center justify-center">
+                  <CreditCard className="w-5 h-5 text-[#dd8157]" />
+                </div>
+                <div>
+                  <h2 className="text-lg font-bold text-gray-900">Billing & Subscription</h2>
+                  <p className="text-sm text-gray-500">Manage your Compliance+ plan, payment method, and invoices</p>
+                </div>
+              </div>
+              <ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-[#dd8157] transition" />
+            </div>
+          </Link>
 
           {/* Change Password Section */}
           <div className="bg-white rounded-xl border border-gray-200 p-6 mb-6">

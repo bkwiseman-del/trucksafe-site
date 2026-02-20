@@ -9,6 +9,8 @@ export const config = {
     '/profile/:path*',
     '/settings/:path*',
     '/billing/:path*',
+    '/complianceplus/checkout/:path*',
+    '/complianceplus/success/:path*',
     '/admin/:path*',
   ],
 }

@@ -1,6 +1,7 @@
 'use client'
 
 import Image from 'next/image'
+import Link from 'next/link'
 import { useState, useEffect, useRef } from 'react'
 import { Shield, TrendingUp, Users, BookOpen, Calendar, Mic, Award, ArrowRight, CheckCircle2, DollarSign, AlertTriangle, FileText, Scale, GraduationCap, FileCheck, BarChart3, FileSignature, Briefcase, PlayCircle } from 'lucide-react'
 import Navigation from '../components/Navigation'
@@ -321,9 +322,9 @@ export default function Homepage() {
                   </div>
                 ))}
               </div>
-              <button className="bg-[#dd8157] hover:bg-[#c86d47] text-white px-8 py-4 rounded-lg font-bold text-lg transition">
+              <Link href="/complianceplus" className="inline-block bg-[#dd8157] hover:bg-[#c86d47] text-white px-8 py-4 rounded-lg font-bold text-lg transition">
                 View Plans & Pricing
-              </button>
+              </Link>
             </div>
 
             <div className="bg-white/10 backdrop-blur-sm p-8 rounded-xl border border-white/20">

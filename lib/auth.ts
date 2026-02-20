@@ -5,7 +5,10 @@ import * as bcrypt from 'bcryptjs'
 import { prisma } from '@/lib/prisma'
 
 // Maps UserRole records from DB into the UserAccess shape the frontend expects
-function buildAccess(roles: { role: string; metadata: unknown }[]) {
+function buildAccess(
+  roles: { role: string; metadata: unknown }[],
+  subscription?: { status: string } | null
+) {
   const roleNames = roles.map((r) => r.role)
 
   const access: any = {
@@ -22,7 +25,8 @@ function buildAccess(roles: { role: string; metadata: unknown }[]) {
         : null
 
   if (complianceTier) {
-    access.complianceMember = { tier: complianceTier, status: 'active' }
+    const subStatus = subscription?.status || 'active'
+    access.complianceMember = { tier: complianceTier, status: subStatus }
   }
 
   const bootcamp = roles.find((r) => r.role === 'BOOTCAMP_ATTENDEE' || r.role === 'BOOTCAMP_ALUMNI')
@@ -123,21 +127,39 @@ export const authOptions: NextAuthOptions = {
       if (user) {
         token.id = user.id
 
-        const roles = await prisma.userRole.findMany({
-          where: { userId: user.id },
-          select: { role: true, metadata: true },
-        })
+        const [roles, subscription] = await Promise.all([
+          prisma.userRole.findMany({
+            where: { userId: user.id },
+            select: { role: true, metadata: true },
+          }),
+          prisma.subscription.findUnique({
+            where: { userId: user.id },
+            select: { status: true },
+          }),
+        ])
 
-        token.access = buildAccess(roles)
+        token.access = buildAccess(roles, subscription)
       }
 
-      // Re-fetch name from DB when client calls update() (e.g. after profile save)
+      // Re-fetch roles + subscription when client calls update()
+      // (e.g. after profile save, subscription change, or checkout)
       if (trigger === 'update' && token.id) {
-        const dbUser = await prisma.user.findUnique({
-          where: { id: token.id as string },
-          select: { name: true },
-        })
+        const [dbUser, roles, subscription] = await Promise.all([
+          prisma.user.findUnique({
+            where: { id: token.id as string },
+            select: { name: true },
+          }),
+          prisma.userRole.findMany({
+            where: { userId: token.id as string },
+            select: { role: true, metadata: true },
+          }),
+          prisma.subscription.findUnique({
+            where: { userId: token.id as string },
+            select: { status: true },
+          }),
+        ])
         if (dbUser) token.name = dbUser.name
+        token.access = buildAccess(roles, subscription)
       }
 
       return token

@@ -73,7 +73,7 @@ export default function DashboardPage() {
             {/* Compliance+ Card */}
             {access.complianceMember?.status === 'active' && (
               <Link
-                href="/complianceplus/dashboard"
+                href="/settings/billing"
                 className="bg-gradient-to-br from-[#363b57] to-[#2a2e42] rounded-xl border-2 border-[#363b57] p-6 hover:border-[#dd8157] hover:shadow-xl transition group"
               >
                 <div className="flex items-center justify-between mb-3">
