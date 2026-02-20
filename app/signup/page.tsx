@@ -1,32 +1,50 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { signIn } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
-import { Mail, Lock, AlertCircle, ArrowRight, CheckCircle } from 'lucide-react'
+import { User, Mail, Lock, AlertCircle, ArrowRight } from 'lucide-react'
 
-export default function LoginPage() {
+export default function SignupPage() {
   const router = useRouter()
+  const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
-  const [justRegistered, setJustRegistered] = useState(false)
-
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search)
-    if (params.get('registered') === 'true') {
-      setJustRegistered(true)
-    }
-  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
-    setIsLoading(true)
 
+    if (password !== confirmPassword) {
+      setError('Passwords do not match.')
+      return
+    }
+
+    if (password.length < 8) {
+      setError('Password must be at least 8 characters.')
+      return
+    }
+
+    setIsLoading(true)
     try {
+      const res = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, password }),
+      })
+
+      const data = await res.json()
+
+      if (!res.ok) {
+        setError(data.error || 'Registration failed. Please try again.')
+        return
+      }
+
+      // Auto sign in with the credentials just created
       const result = await signIn('credentials', {
         email,
         password,
@@ -34,21 +52,18 @@ export default function LoginPage() {
       })
 
       if (result?.error) {
-        setError('Invalid email or password')
-        setIsLoading(false)
-      } else {
-        router.push('/dashboard')
-        router.refresh()
+        // Registration succeeded but auto-login failed — fall back to login page
+        router.push('/login?registered=true')
+        return
       }
-    } catch (error) {
-      setError('An error occurred. Please try again.')
+
+      router.push('/dashboard')
+      router.refresh()
+    } catch {
+      setError('Something went wrong. Please try again.')
+    } finally {
       setIsLoading(false)
     }
-  }
-
-  const handleGoogleSignIn = async () => {
-    setIsLoading(true)
-    await signIn('google', { callbackUrl: '/dashboard' })
   }
 
   return (
@@ -57,27 +72,27 @@ export default function LoginPage() {
         {/* Logo */}
         <div className="text-center">
           <a href="/">
-            <Image 
-              src="/Horizontal_TM_Dark.svg" 
-              alt="Trucksafe" 
-              width={200} 
+            <Image
+              src="/Horizontal_TM_Dark.svg"
+              alt="Trucksafe"
+              width={200}
               height={60}
               className="h-12 w-auto mx-auto mb-8"
             />
           </a>
           <h2 className="text-3xl font-black text-gray-900">
-            Welcome back
+            Create your account
           </h2>
           <p className="mt-2 text-sm text-gray-600">
-            Sign in to access your Trucksafe account
+            Join the Trucksafe Network for free
           </p>
         </div>
 
-        {/* Login Form */}
+        {/* Signup Form */}
         <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-8">
-          {/* Google Sign In Button */}
+          {/* Google Sign Up Button */}
           <button
-            onClick={handleGoogleSignIn}
+            onClick={() => signIn('google', { callbackUrl: '/dashboard' })}
             disabled={isLoading}
             className="w-full flex items-center justify-center gap-3 bg-white hover:bg-gray-50 text-gray-700 px-6 py-3 rounded-lg font-semibold border-2 border-gray-300 transition disabled:opacity-50 disabled:cursor-not-allowed mb-6"
           >
@@ -96,21 +111,11 @@ export default function LoginPage() {
               <div className="w-full border-t border-gray-300"></div>
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-white text-gray-500">Or continue with email</span>
+              <span className="px-2 bg-white text-gray-500">Or sign up with email</span>
             </div>
           </div>
 
-          {/* Registration Success */}
-          {justRegistered && (
-            <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-start gap-3 mb-6">
-              <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-              <div className="text-sm text-green-800">
-                Account created successfully! Sign in with your new credentials.
-              </div>
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-5">
             {/* Error Message */}
             {error && (
               <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3">
@@ -119,7 +124,30 @@ export default function LoginPage() {
               </div>
             )}
 
-            {/* Email Field */}
+            {/* Full Name */}
+            <div>
+              <label htmlFor="name" className="block text-sm font-semibold text-gray-700 mb-2">
+                Full Name
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <User className="h-5 w-5 text-gray-400" />
+                </div>
+                <input
+                  id="name"
+                  name="name"
+                  type="text"
+                  autoComplete="name"
+                  required
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#dd8157] focus:border-transparent"
+                  placeholder="Jane Smith"
+                />
+              </div>
+            </div>
+
+            {/* Email */}
             <div>
               <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-2">
                 Email Address
@@ -142,7 +170,7 @@ export default function LoginPage() {
               </div>
             </div>
 
-            {/* Password Field */}
+            {/* Password */}
             <div>
               <label htmlFor="password" className="block text-sm font-semibold text-gray-700 mb-2">
                 Password
@@ -155,32 +183,37 @@ export default function LoginPage() {
                   id="password"
                   name="password"
                   type="password"
-                  autoComplete="current-password"
+                  autoComplete="new-password"
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#dd8157] focus:border-transparent"
-                  placeholder="••••••••"
+                  placeholder="Min. 8 characters"
                 />
               </div>
             </div>
 
-            {/* Remember & Forgot */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
+            {/* Confirm Password */}
+            <div>
+              <label htmlFor="confirmPassword" className="block text-sm font-semibold text-gray-700 mb-2">
+                Confirm Password
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Lock className="h-5 w-5 text-gray-400" />
+                </div>
                 <input
-                  id="remember-me"
-                  name="remember-me"
-                  type="checkbox"
-                  className="h-4 w-4 text-[#dd8157] focus:ring-[#dd8157] border-gray-300 rounded"
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  type="password"
+                  autoComplete="new-password"
+                  required
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#dd8157] focus:border-transparent"
+                  placeholder="••••••••"
                 />
-                <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">
-                  Remember me
-                </label>
               </div>
-              <a href="/forgot-password" className="text-sm font-semibold text-[#dd8157] hover:text-[#c86d47]">
-                Forgot password?
-              </a>
             </div>
 
             {/* Submit Button */}
@@ -192,25 +225,24 @@ export default function LoginPage() {
               {isLoading ? (
                 <>
                   <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  Signing in...
+                  Creating account...
                 </>
               ) : (
                 <>
-                  Sign In
+                  Create Account
                   <ArrowRight className="w-5 h-5" />
                 </>
               )}
             </button>
           </form>
-
         </div>
 
-        {/* Sign Up Link */}
+        {/* Sign In Link */}
         <div className="text-center">
           <p className="text-sm text-gray-600">
-            Don't have an account?{' '}
-            <a href="/signup" className="font-semibold text-[#dd8157] hover:text-[#c86d47]">
-              Create free account
+            Already have an account?{' '}
+            <a href="/login" className="font-semibold text-[#dd8157] hover:text-[#c86d47]">
+              Sign in
             </a>
           </p>
         </div>

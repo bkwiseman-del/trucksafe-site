@@ -1,32 +1,36 @@
 'use client'
 
-import { MessageCircle, Shield, GraduationCap, Calendar, ArrowRight, Clock, Users, TrendingUp, Video, FileText, Sparkles } from 'lucide-react'
+import { useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import { MessageCircle, Shield, GraduationCap, Calendar, ArrowRight, TrendingUp } from 'lucide-react'
 import Link from 'next/link'
-import Navigation from '../../components/Navigation'
-import Footer from '../../components/Footer'
+import Navigation from '@/components/Navigation'
+import Footer from '@/components/Footer'
+import { useUser } from '@/hooks/useUser'
 
 export default function DashboardPage() {
-  const user = {
-    firstName: 'John',
-    name: 'John Doe'
+  const { user, access, isLoading } = useUser()
+  const router = useRouter()
+
+  useEffect(() => {
+    if (!isLoading && !user) {
+      router.push('/login')
+    }
+  }, [isLoading, user, router])
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-[#dd8157] border-t-transparent rounded-full animate-spin" />
+      </div>
+    )
   }
 
-  const access = {
-    networkMember: true,
-    complianceMember: {
-      tier: 'pro',
-      status: 'active'
-    },
-    bootcampAttendee: {
-      year: 2026
-    },
-    academyAccess: true
-  }
+  if (!user || !access) return null
 
   return (
     <div className="bg-gray-50">
       <Navigation />
-
       <div className="pt-32 pb-20 px-6">
         <div className="max-w-7xl mx-auto">
           {/* Welcome Header */}
@@ -320,7 +324,6 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
-
       <Footer />
     </div>
   )

@@ -2,40 +2,17 @@
 
 import { useState } from 'react'
 import { usePathname } from 'next/navigation'
-import { useSession, signOut } from 'next-auth/react'
+import { signOut } from 'next-auth/react'
+import { useUser } from '@/hooks/useUser'
 import Link from 'next/link'
 import { Home, MessageCircle, GraduationCap, Shield, Calendar, Briefcase, Award, Bell, Settings, ChevronDown, LogOut, Users, BookOpen, Video, FileText, Search, BookMarked } from 'lucide-react'
 
 export function MemberBar() {
   const pathname = usePathname()
-  const { data: session } = useSession()
+  const { user, access } = useUser()
   const [showProfileMenu, setShowProfileMenu] = useState(false)
-  
-  // Don't show member bar if not logged in
-  if (!session?.user) return null
-  
-  // Mock user data - in production, fetch from database based on session
-  const user = {
-    id: session.user.email || '1',
-    name: session.user.name || 'User',
-    firstName: session.user.name?.split(' ')[0] || 'User',
-    email: session.user.email || '',
-    initials: session.user.name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U'
-  }
-  
-  // Mock access - in production, fetch from database
-  const access = {
-    networkMember: true,
-    complianceMember: {
-      tier: 'pro' as const,
-      status: 'active' as const
-    },
-    bootcampAttendee: {
-      year: 2026,
-      status: 'attended' as const
-    },
-    academyAccess: true
-  }
+
+  if (!user || !access) return null
 
   // Determine current section based on pathname
   const getCurrentSection = () => {
