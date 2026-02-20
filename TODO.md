@@ -34,6 +34,9 @@
 - [ ] Trucksafe LIVE! show notes + episode pages
 - [ ] TSC Certification (future)
 
+## UX Improvements
+- [ ] Dynamic form/signup boxes for logged-in members — swap newsletter signup, contact forms, etc. with contextual CTAs (e.g., link to notification settings, dashboard, or account preferences instead of re-collecting info)
+
 ## Infrastructure
 - [ ] File/image upload system (S3 or similar)
 - [ ] Email templates
