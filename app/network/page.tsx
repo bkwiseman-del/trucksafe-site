@@ -3,8 +3,6 @@
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { Users, MessageCircle, Award, Calendar, BookOpen, TrendingUp, CheckCircle2, ArrowRight, Lock, Star, Video, Shield, Briefcase, Clock } from 'lucide-react'
-import Navigation from '../../components/Navigation'
-import Footer from '../../components/Footer'
 
 export default function NetworkPage() {
   const [stats, setStats] = useState({ members: 0, posts: 0, categories: 0 })
@@ -157,9 +155,7 @@ export default function NetworkPage() {
   ]
 
   return (
-    <div className="min-h-screen bg-white">
-      <Navigation />
-
+    <>
       {/* Hero */}
       <section className="relative pt-32 pb-20 px-6 bg-gradient-to-br from-[#363b57] to-[#2a2e42] overflow-hidden">
         <div className="absolute inset-0 opacity-10">
@@ -512,8 +508,7 @@ export default function NetworkPage() {
         </div>
       </section>
 
-      <Footer />
-    </div>
+    </>
   )
 }
 

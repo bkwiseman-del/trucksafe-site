@@ -5,6 +5,7 @@ export const config = {
     '/dashboard/:path*',
     '/portal/:path*',
     '/network/forums/:path*',
+    '/network/members/:path*',
     '/profile/:path*',
     '/settings/:path*',
     '/billing/:path*',

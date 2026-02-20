@@ -15,7 +15,20 @@ module.exports = {
         'admin-card': '#1f2937',
         'admin-border': '#374151',
       },
+      typography: {
+        DEFAULT: {
+          css: {
+            a: {
+              color: '#dd8157',
+              '&:hover': { color: '#c86d47' },
+            },
+            blockquote: {
+              borderLeftColor: '#dd8157',
+            },
+          },
+        },
+      },
     },
   },
-  plugins: [],
+  plugins: [require('@tailwindcss/typography')],
 }

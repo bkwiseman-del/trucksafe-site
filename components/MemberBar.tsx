@@ -254,14 +254,27 @@ export function MemberBar() {
                       >
                         Account Settings
                       </a>
-                      <a 
-                        href="/billing" 
+                      <a
+                        href="/billing"
                         className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition"
                         onClick={() => setShowProfileMenu(false)}
                       >
                         Billing & Subscriptions
                       </a>
                     </div>
+
+                    {/* Admin Link */}
+                    {access?.isAdmin && (
+                      <div className="border-t border-gray-100 py-2">
+                        <a
+                          href="/admin"
+                          className="block px-4 py-2 text-sm font-semibold text-[#dd8157] hover:bg-orange-50 transition"
+                          onClick={() => setShowProfileMenu(false)}
+                        >
+                          Admin Dashboard
+                        </a>
+                      </div>
+                    )}
 
                     {/* Logout */}
                     <div className="border-t border-gray-100 py-2">
