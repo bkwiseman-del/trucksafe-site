@@ -1,4 +1,4 @@
-import { NextAuthOptions } from 'next-auth'
+import { NextAuthOptions, getServerSession } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import GoogleProvider from 'next-auth/providers/google'
 import * as bcrypt from 'bcryptjs'
@@ -117,7 +117,7 @@ export const authOptions: NextAuthOptions = {
       return true
     },
 
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger }) {
       // user is only present on initial sign-in, not on every token refresh
       if (user) {
         token.id = user.id
@@ -129,6 +129,16 @@ export const authOptions: NextAuthOptions = {
 
         token.access = buildAccess(roles)
       }
+
+      // Re-fetch name from DB when client calls update() (e.g. after profile save)
+      if (trigger === 'update' && token.id) {
+        const dbUser = await prisma.user.findUnique({
+          where: { id: token.id as string },
+          select: { name: true },
+        })
+        if (dbUser) token.name = dbUser.name
+      }
+
       return token
     },
 
@@ -140,4 +150,10 @@ export const authOptions: NextAuthOptions = {
       return session
     },
   },
+}
+
+export async function getAuthenticatedUser() {
+  const session = await getServerSession(authOptions)
+  if (!session?.user?.id) return null
+  return session.user
 }
