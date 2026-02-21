@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
 import { prisma } from '@/lib/prisma'
 import { stripe, syncSubscriptionRoles } from '@/lib/stripe'
+import { sendSubscriptionConfirmationEmail, sendPaymentFailedEmail } from '@/lib/sendgrid'
 
 export async function POST(req: NextRequest) {
   const body = await req.text()
@@ -221,6 +222,21 @@ async function handlePaymentSucceeded(invoice: any) {
       lastSyncedAt: new Date(),
     },
   })
+
+  // Send subscription confirmation email
+  const user = await prisma.user.findUnique({
+    where: { id: record.userId },
+    select: { email: true, name: true },
+  })
+  if (user) {
+    sendSubscriptionConfirmationEmail(record.userId, user, {
+      tierName: record.tier.displayName,
+      amount: invoice.amount_paid,
+      currency: invoice.currency,
+      periodStart: record.currentPeriodStart,
+      periodEnd: record.currentPeriodEnd,
+    })
+  }
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -230,6 +246,7 @@ async function handlePaymentFailed(invoice: any) {
 
   const record = await prisma.subscription.findUnique({
     where: { stripeSubscriptionId: subId },
+    include: { tier: true },
   })
 
   if (!record) return
@@ -255,4 +272,17 @@ async function handlePaymentFailed(invoice: any) {
       description: 'Payment failed',
     },
   })
+
+  // Send payment failed alert email
+  const user = await prisma.user.findUnique({
+    where: { id: record.userId },
+    select: { email: true, name: true },
+  })
+  if (user) {
+    sendPaymentFailedEmail(record.userId, user, {
+      amount: invoice.amount_due,
+      currency: invoice.currency,
+      description: `${record.tier.displayName} Compliance+ subscription`,
+    })
+  }
 }

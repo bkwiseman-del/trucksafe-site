@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import * as bcrypt from 'bcryptjs'
 import { prisma } from '@/lib/prisma'
+import { sendWelcomeEmail } from '@/lib/sendgrid'
 
 export async function POST(req: NextRequest) {
   try {
@@ -57,6 +58,9 @@ export async function POST(req: NextRequest) {
         role: 'NETWORK_MEMBER',
       },
     })
+
+    // Fire-and-forget welcome email
+    sendWelcomeEmail({ email: normalizedEmail, name: name.trim() })
 
     return NextResponse.json({ success: true }, { status: 201 })
   } catch (error: any) {

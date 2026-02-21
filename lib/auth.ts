@@ -3,6 +3,7 @@ import CredentialsProvider from 'next-auth/providers/credentials'
 import GoogleProvider from 'next-auth/providers/google'
 import * as bcrypt from 'bcryptjs'
 import { prisma } from '@/lib/prisma'
+import { sendWelcomeEmail } from '@/lib/sendgrid'
 
 // Maps UserRole records from DB into the UserAccess shape the frontend expects
 function buildAccess(
@@ -114,6 +115,7 @@ export const authOptions: NextAuthOptions = {
           await prisma.userRole.create({
             data: { userId: newUser.id, role: 'NETWORK_MEMBER' },
           })
+          sendWelcomeEmail({ email: user.email!, name: user.name ?? null })
           user.id = newUser.id
         } else {
           user.id = existing.id

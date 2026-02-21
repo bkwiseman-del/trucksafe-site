@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import * as bcrypt from 'bcryptjs'
 import { prisma } from '@/lib/prisma'
 import { getAuthenticatedUser } from '@/lib/auth'
+import { sendPasswordChangedEmail } from '@/lib/sendgrid'
 
 export async function PUT(req: NextRequest) {
   try {
@@ -28,7 +29,7 @@ export async function PUT(req: NextRequest) {
 
     const user = await prisma.user.findUnique({
       where: { id: sessionUser.id },
-      select: { password: true },
+      select: { password: true, email: true, name: true },
     })
 
     if (!user?.password) {
@@ -52,6 +53,8 @@ export async function PUT(req: NextRequest) {
       where: { id: sessionUser.id },
       data: { password: hashedPassword },
     })
+
+    sendPasswordChangedEmail({ email: user.email, name: user.name })
 
     return NextResponse.json({ success: true })
   } catch (error: any) {
