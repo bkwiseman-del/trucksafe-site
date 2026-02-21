@@ -76,7 +76,7 @@ export function MemberBar() {
       
       case 'compliance':
         return [
-          { icon: Home, label: 'Dashboard', href: '/complianceplus/dashboard' },
+          { icon: Shield, label: 'Overview', href: '/complianceplus/dashboard' },
           { icon: Video, label: 'Webinars', href: '/complianceplus/webinars' },
           { icon: FileText, label: 'Reports', href: '/complianceplus/reports' },
           { icon: BookOpen, label: 'Resources', href: '/complianceplus/resources' }
