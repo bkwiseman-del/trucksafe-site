@@ -7,11 +7,11 @@ const BASIC_FEATURES = [
   'Resource library access',
   'Training video library',
   'Trucksafe Network membership',
-  'Monthly group webinars',
 ]
 
 const PRO_FEATURES = [
   ...BASIC_FEATURES,
+  'Quarterly group webinars',
   'Monthly compliance health reports',
   '2 hours/quarter consulting time',
   'Policy review & recommendations',
@@ -19,12 +19,11 @@ const PRO_FEATURES = [
 ]
 
 const PREMIUM_FEATURES = [
-  ...PRO_FEATURES,
-  '5 hours/quarter consulting time',
+  ...PRO_FEATURES.filter(f => f !== '2 hours/quarter consulting time'),
+  '4 hours/quarter consulting time',
   'Custom policy drafting',
   'Emergency compliance hotline',
   'Mock DOT audit preparation',
-  'Dedicated account manager',
 ]
 
 const tiers = [
@@ -34,7 +33,8 @@ const tiers = [
     price: 9500,
     interval: 'monthly',
     features: BASIC_FEATURES,
-    stripePriceId: 'price_basic_monthly_REPLACE_ME',
+    stripePriceId: 'price_1T3HwcLtG4BUJxO0DeIjYVBG',
+    minimumTermMonths: 0,
   },
   {
     name: 'BASIC_ANNUAL',
@@ -42,39 +42,44 @@ const tiers = [
     price: 95000,
     interval: 'yearly',
     features: BASIC_FEATURES,
-    stripePriceId: 'price_basic_annual_REPLACE_ME',
+    stripePriceId: 'price_1T3HxULtG4BUJxO0iPFi5z6J',
+    minimumTermMonths: 0,
   },
   {
     name: 'PRO_MONTHLY',
     displayName: 'Pro',
-    price: 49500,
+    price: 29500,
     interval: 'monthly',
     features: PRO_FEATURES,
-    stripePriceId: 'price_pro_monthly_REPLACE_ME',
+    stripePriceId: 'price_1T3I1CLtG4BUJxO0PLkrxPWk',
+    minimumTermMonths: 12,
   },
   {
     name: 'PRO_ANNUAL',
     displayName: 'Pro',
-    price: 495000,
+    price: 295000,
     interval: 'yearly',
     features: PRO_FEATURES,
-    stripePriceId: 'price_pro_annual_REPLACE_ME',
+    stripePriceId: 'price_1T3I1YLtG4BUJxO08We2kMR8',
+    minimumTermMonths: 12,
   },
   {
     name: 'PREMIUM_MONTHLY',
     displayName: 'Premium',
-    price: 99500,
+    price: 59500,
     interval: 'monthly',
     features: PREMIUM_FEATURES,
-    stripePriceId: 'price_premium_monthly_REPLACE_ME',
+    stripePriceId: 'price_1T3I1pLtG4BUJxO0qQubFO4p',
+    minimumTermMonths: 12,
   },
   {
     name: 'PREMIUM_ANNUAL',
     displayName: 'Premium',
-    price: 995000,
+    price: 595000,
     interval: 'yearly',
     features: PREMIUM_FEATURES,
-    stripePriceId: 'price_premium_annual_REPLACE_ME',
+    stripePriceId: 'price_1T3I26LtG4BUJxO0kXnMgdU1',
+    minimumTermMonths: 12,
   },
 ]
 
@@ -90,10 +95,12 @@ async function main() {
         interval: tier.interval,
         features: tier.features,
         stripePriceId: tier.stripePriceId,
+        minimumTermMonths: tier.minimumTermMonths,
       },
       create: tier,
     })
-    console.log(`  ✓ ${tier.name}: $${(tier.price / 100).toFixed(2)}/${tier.interval}`)
+    const termLabel = tier.minimumTermMonths > 0 ? ` (${tier.minimumTermMonths}-mo minimum)` : ''
+    console.log(`  ✓ ${tier.name}: $${(tier.price / 100).toFixed(2)}/${tier.interval}${termLabel}`)
   }
 
   console.log('Done!')

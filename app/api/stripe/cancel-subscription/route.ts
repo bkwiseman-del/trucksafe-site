@@ -11,10 +11,27 @@ export async function POST() {
 
   const subscription = await prisma.subscription.findUnique({
     where: { userId: user.id },
+    include: { tier: true },
   })
 
   if (!subscription || !['active', 'trialing'].includes(subscription.status)) {
     return NextResponse.json({ error: 'No active subscription found' }, { status: 400 })
+  }
+
+  // Enforce minimum term
+  if (subscription.minimumTermEnd && new Date() < subscription.minimumTermEnd) {
+    const endDate = subscription.minimumTermEnd.toLocaleDateString('en-US', {
+      month: 'long',
+      day: 'numeric',
+      year: 'numeric',
+    })
+    return NextResponse.json(
+      {
+        error: `Your ${subscription.tier.displayName} plan has a 12-month minimum commitment. You can cancel after ${endDate}.`,
+        minimumTermEnd: subscription.minimumTermEnd,
+      },
+      { status: 403 }
+    )
   }
 
   // Cancel at period end (user keeps access until billing period ends)

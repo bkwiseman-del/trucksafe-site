@@ -16,14 +16,19 @@
 - [ ] YouTube API for Trucksafe LIVE! episodes + transcripts
 
 ## Stripe Setup (manual — Brandon)
-- [ ] Add test API keys to .env.local (STRIPE_SECRET_KEY, NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY, STRIPE_WEBHOOK_SECRET)
-- [ ] Create 3 Products in Stripe dashboard (Basic, Pro, Premium)
-- [ ] Create 6 Prices (monthly + annual for each product)
+- [x] Add test API keys to .env.local (STRIPE_SECRET_KEY, NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY)
+- [ ] Create 3 Products in Stripe sandbox (Basic $95/mo, Pro $295/mo, Premium $595/mo)
+- [ ] Create 6 Prices (monthly + annual for each product — annual = 10x monthly)
 - [ ] Update stripePriceId values in prisma/seed-tiers.ts with real Stripe Price IDs
 - [ ] Run seed script: npx ts-node prisma/seed-tiers.ts
 - [ ] Set up local webhook forwarding: stripe listen --forward-to localhost:3001/api/stripe/webhook
+- [ ] Add STRIPE_WEBHOOK_SECRET from webhook listener to .env.local
 - [ ] Test checkout with Stripe test card (4242 4242 4242 4242)
 - [ ] Configure Stripe Customer Portal in Stripe dashboard (for payment method management)
+
+## Legal (manual — Brandon)
+- [ ] Update Terms of Service / Terms and Conditions to include 12-month minimum commitment clause for Pro and Premium plans
+- [ ] Add cancellation policy language (Pro/Premium cannot cancel before 12 months; Basic can cancel anytime)
 
 ## Core Features
 - [x] Admin CMS (manage users, content, forums, etc.)

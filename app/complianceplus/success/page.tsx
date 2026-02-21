@@ -1,16 +1,16 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useSession } from 'next-auth/react'
-import Link from 'next/link'
 import { CheckCircle, ArrowRight } from 'lucide-react'
 
 export default function SubscriptionSuccessPage() {
   const { update } = useSession()
+  const [refreshed, setRefreshed] = useState(false)
 
   useEffect(() => {
     // Refresh the session so the new subscription role is reflected
-    update()
+    update().then(() => setRefreshed(true))
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
@@ -30,19 +30,28 @@ export default function SubscriptionSuccessPage() {
           </p>
 
           <div className="space-y-3">
-            <Link
-              href="/dashboard"
-              className="flex items-center justify-center gap-2 w-full py-3 px-6 text-white font-bold rounded-xl bg-[#dd8157] hover:bg-[#c86d47] transition"
-            >
-              Go to Dashboard
-              <ArrowRight className="w-4 h-4" />
-            </Link>
-            <Link
-              href="/settings/billing"
-              className="flex items-center justify-center gap-2 w-full py-3 px-6 text-gray-700 font-medium rounded-xl bg-gray-100 hover:bg-gray-200 transition text-sm"
-            >
-              Manage Subscription
-            </Link>
+            {refreshed ? (
+              <>
+                <a
+                  href="/dashboard"
+                  className="flex items-center justify-center gap-2 w-full py-3 px-6 text-white font-bold rounded-xl bg-[#dd8157] hover:bg-[#c86d47] transition"
+                >
+                  Go to Dashboard
+                  <ArrowRight className="w-4 h-4" />
+                </a>
+                <a
+                  href="/settings/billing"
+                  className="flex items-center justify-center gap-2 w-full py-3 px-6 text-gray-700 font-medium rounded-xl bg-gray-100 hover:bg-gray-200 transition text-sm"
+                >
+                  Manage Subscription
+                </a>
+              </>
+            ) : (
+              <div className="flex items-center justify-center gap-2 text-sm text-gray-500">
+                <div className="w-4 h-4 border-2 border-[#dd8157] border-t-transparent rounded-full animate-spin" />
+                Setting up your account...
+              </div>
+            )}
           </div>
         </div>
       </div>

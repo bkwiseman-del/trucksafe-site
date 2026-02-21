@@ -46,13 +46,15 @@ export async function POST(req: NextRequest) {
   })
 
   // Update local record
+  // Clover API: current_period_start/end moved from subscription to items.data[0]
+  const updatedItem = updated.items.data[0]
   await prisma.subscription.update({
     where: { userId: user.id },
     data: {
       tierId: newTier.id,
       status: updated.status as string,
-      currentPeriodStart: new Date(updated.current_period_start * 1000),
-      currentPeriodEnd: new Date(updated.current_period_end * 1000),
+      currentPeriodStart: new Date(updatedItem.current_period_start * 1000),
+      currentPeriodEnd: new Date(updatedItem.current_period_end * 1000),
     },
   })
 

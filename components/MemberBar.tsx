@@ -255,7 +255,7 @@ export function MemberBar() {
                         Account Settings
                       </a>
                       <a
-                        href="/billing"
+                        href="/settings/billing"
                         className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition"
                         onClick={() => setShowProfileMenu(false)}
                       >

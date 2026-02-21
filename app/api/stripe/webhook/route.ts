@@ -83,13 +83,15 @@ async function handleSubscriptionChange(sub: any) {
     },
   })
 
-  const data = {
+  // Clover API: current_period_start/end moved from subscription to items.data[0]
+  const item = sub.items.data[0]
+  const data: Record<string, unknown> = {
     tierId: tier.id,
     stripeCustomerId,
     stripeSubscriptionId: sub.id,
     status: sub.status,
-    currentPeriodStart: new Date(sub.current_period_start * 1000),
-    currentPeriodEnd: new Date(sub.current_period_end * 1000),
+    currentPeriodStart: new Date(item.current_period_start * 1000),
+    currentPeriodEnd: new Date(item.current_period_end * 1000),
     cancelAtPeriodEnd: sub.cancel_at_period_end,
   }
 
@@ -109,8 +111,13 @@ async function handleSubscriptionChange(sub: any) {
       return
     }
 
+    // Set minimum term end for new subscriptions
+    if (tier.minimumTermMonths > 0) {
+      data.minimumTermEnd = new Date(Date.now() + tier.minimumTermMonths * 30.44 * 24 * 60 * 60 * 1000)
+    }
+
     await prisma.subscription.create({
-      data: { userId, ...data },
+      data: { userId, ...data } as any,
     })
 
     await syncSubscriptionRoles(userId, tier.name, sub.status)
@@ -134,13 +141,43 @@ async function handleSubscriptionDeleted(sub: any) {
   await syncSubscriptionRoles(record.userId, '', 'canceled')
 }
 
+// Clover API: invoice.subscription → invoice.parent.subscription_details.subscription
+function getSubscriptionIdFromInvoice(invoice: any): string | null {
+  // Clover API path
+  if (invoice.parent?.subscription_details?.subscription) {
+    return invoice.parent.subscription_details.subscription
+  }
+  // Legacy fallback
+  if (invoice.subscription) {
+    return typeof invoice.subscription === 'string'
+      ? invoice.subscription
+      : invoice.subscription.id
+  }
+  return null
+}
+
+// Clover API: invoice.payment_intent removed; get from invoice payments resource
+async function getPaymentIntentIdFromInvoice(invoice: any): Promise<string> {
+  try {
+    const invoicePayments = await stripe.invoicePayments.list({ invoice: invoice.id, limit: 1 } as any)
+    const piId = (invoicePayments as any).data?.[0]?.payment?.payment_intent
+    if (piId) return piId
+  } catch {
+    // Fall through to legacy
+  }
+  // Legacy fallback
+  if (invoice.payment_intent) {
+    return typeof invoice.payment_intent === 'string'
+      ? invoice.payment_intent
+      : invoice.payment_intent.id
+  }
+  return invoice.id
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function handlePaymentSucceeded(invoice: any) {
-  if (!invoice.subscription) return
-
-  const subId = typeof invoice.subscription === 'string'
-    ? invoice.subscription
-    : invoice.subscription.id
+  const subId = getSubscriptionIdFromInvoice(invoice)
+  if (!subId) return
 
   const record = await prisma.subscription.findUnique({
     where: { stripeSubscriptionId: subId },
@@ -149,13 +186,15 @@ async function handlePaymentSucceeded(invoice: any) {
 
   if (!record) return
 
+  const stripePaymentId = await getPaymentIntentIdFromInvoice(invoice)
+
   // Record payment
   await prisma.paymentHistory.upsert({
-    where: { stripePaymentId: invoice.payment_intent as string || invoice.id },
+    where: { stripePaymentId },
     update: { status: 'succeeded' },
     create: {
       userId: record.userId,
-      stripePaymentId: (invoice.payment_intent as string) || invoice.id,
+      stripePaymentId,
       amount: invoice.amount_paid,
       currency: invoice.currency,
       status: 'succeeded',
@@ -186,11 +225,8 @@ async function handlePaymentSucceeded(invoice: any) {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function handlePaymentFailed(invoice: any) {
-  if (!invoice.subscription) return
-
-  const subId = typeof invoice.subscription === 'string'
-    ? invoice.subscription
-    : invoice.subscription.id
+  const subId = getSubscriptionIdFromInvoice(invoice)
+  if (!subId) return
 
   const record = await prisma.subscription.findUnique({
     where: { stripeSubscriptionId: subId },
@@ -204,13 +240,15 @@ async function handlePaymentFailed(invoice: any) {
     data: { status: 'past_due' },
   })
 
+  const stripePaymentId = await getPaymentIntentIdFromInvoice(invoice)
+
   // Record failed payment
   await prisma.paymentHistory.upsert({
-    where: { stripePaymentId: (invoice.payment_intent as string) || invoice.id },
+    where: { stripePaymentId },
     update: { status: 'failed' },
     create: {
       userId: record.userId,
-      stripePaymentId: (invoice.payment_intent as string) || invoice.id,
+      stripePaymentId,
       amount: invoice.amount_due,
       currency: invoice.currency,
       status: 'failed',

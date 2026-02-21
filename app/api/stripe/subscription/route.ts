@@ -31,6 +31,8 @@ export async function GET() {
       currentPeriodStart: subscription.currentPeriodStart,
       currentPeriodEnd: subscription.currentPeriodEnd,
       cancelAtPeriodEnd: subscription.cancelAtPeriodEnd,
+      minimumTermEnd: subscription.minimumTermEnd,
+      minimumTermMonths: subscription.tier.minimumTermMonths,
     },
   })
 }

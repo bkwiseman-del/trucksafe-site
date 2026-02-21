@@ -8,6 +8,7 @@ import { Check, Crown, Shield, Zap, ArrowRight } from 'lucide-react'
 interface TierGroup {
   displayName: string
   features: string[]
+  minimumTermMonths: number
   monthly: { id: string; price: number } | null
   annual: { id: string; price: number } | null
 }
@@ -168,6 +169,11 @@ export default function CompliancePlusPage() {
                             Save ${(monthlySavings / 100).toLocaleString()}/yr
                           </p>
                         )}
+                        {tier.minimumTermMonths > 0 && (
+                          <p className="text-xs text-gray-400 mt-2">
+                            {tier.minimumTermMonths}-month minimum commitment
+                          </p>
+                        )}
                       </>
                     ) : (
                       <span className="text-gray-400">Not available</span>
@@ -216,10 +222,10 @@ export default function CompliancePlusPage() {
         {/* FAQ / Bottom CTA */}
         <div className="text-center">
           <p className="text-gray-500">
-            Questions? Reach out at{' '}
-            <a href="mailto:brandon@trucksafe.com" className="text-[#dd8157] hover:underline font-medium">
-              brandon@trucksafe.com
-            </a>
+            Questions?{' '}
+            <Link href="/contact" className="text-[#dd8157] hover:underline font-medium">
+              Contact us.
+            </Link>
           </p>
         </div>
       </div>

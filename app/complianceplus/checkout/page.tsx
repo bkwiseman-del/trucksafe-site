@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, Suspense } from 'react'
+import { useState, useEffect, useRef, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { useUser } from '@/hooks/useUser'
 import { loadStripe } from '@stripe/stripe-js'
@@ -91,6 +91,7 @@ function CheckoutContent() {
   const [clientSecret, setClientSecret] = useState<string | null>(null)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
+  const initRef = useRef(false)
 
   const tierId = searchParams.get('tierId')
 
@@ -104,6 +105,9 @@ function CheckoutContent() {
       router.push('/complianceplus')
       return
     }
+    // Prevent double-initialization (React StrictMode, HMR, webhook-triggered re-renders)
+    if (initRef.current) return
+    initRef.current = true
 
     async function initCheckout() {
       try {
@@ -130,15 +134,30 @@ function CheckoutContent() {
           body: JSON.stringify({ tierId }),
         })
 
+        const text = await res.text()
+        let data
+        try {
+          data = JSON.parse(text)
+        } catch {
+          console.error('Non-JSON response from create-subscription:', text.substring(0, 500))
+          setError('Server error. Please try again.')
+          return
+        }
+
         if (!res.ok) {
-          const data = await res.json()
+          // If user already has an active subscription, redirect to success page
+          // (this happens when payment went through but redirect didn't fire)
+          if (res.status === 400 && data.error?.includes('active subscription')) {
+            router.push('/complianceplus/success')
+            return
+          }
           setError(data.error || 'Failed to initialize checkout')
           return
         }
 
-        const data = await res.json()
         setClientSecret(data.clientSecret)
-      } catch {
+      } catch (err) {
+        console.error('Checkout init error:', err)
         setError('Something went wrong. Please try again.')
       } finally {
         setLoading(false)

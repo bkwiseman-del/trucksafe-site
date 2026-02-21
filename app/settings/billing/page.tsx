@@ -30,6 +30,8 @@ interface SubscriptionData {
   currentPeriodStart: string
   currentPeriodEnd: string
   cancelAtPeriodEnd: boolean
+  minimumTermEnd: string | null
+  minimumTermMonths: number
 }
 
 interface PaymentRecord {
@@ -273,7 +275,7 @@ export default function BillingPage() {
               )}
             </div>
 
-            <div className="p-6 flex items-center gap-4 text-sm text-gray-500">
+            <div className="p-6 flex items-center gap-4 text-sm text-gray-500 flex-wrap">
               <span className="flex items-center gap-1.5">
                 <Calendar className="w-4 h-4" />
                 Next billing:{' '}
@@ -283,6 +285,17 @@ export default function BillingPage() {
                   year: 'numeric',
                 })}
               </span>
+              {subscription.minimumTermEnd && new Date(subscription.minimumTermEnd) > new Date() && (
+                <span className="flex items-center gap-1.5 text-[#dd8157]">
+                  <Clock className="w-4 h-4" />
+                  {subscription.minimumTermMonths}-month commitment through{' '}
+                  {new Date(subscription.minimumTermEnd).toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric',
+                  })}
+                </span>
+              )}
             </div>
 
             {/* Actions */}
@@ -302,12 +315,18 @@ export default function BillingPage() {
                 Manage Payment Method
               </button>
               {!subscription.cancelAtPeriodEnd && (
-                <button
-                  onClick={() => setShowCancelModal(true)}
-                  className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition"
-                >
-                  Cancel Subscription
-                </button>
+                subscription.minimumTermEnd && new Date(subscription.minimumTermEnd) > new Date() ? (
+                  <span className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-400 bg-gray-50 rounded-lg cursor-not-allowed" title={`${subscription.minimumTermMonths}-month minimum commitment — cancellation available after ${new Date(subscription.minimumTermEnd).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}`}>
+                    Cancel Subscription
+                  </span>
+                ) : (
+                  <button
+                    onClick={() => setShowCancelModal(true)}
+                    className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition"
+                  >
+                    Cancel Subscription
+                  </button>
+                )
               )}
             </div>
           </div>

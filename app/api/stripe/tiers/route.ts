@@ -10,6 +10,7 @@ export async function GET() {
   const grouped: Record<string, {
     displayName: string
     features: unknown
+    minimumTermMonths: number
     monthly: { id: string; price: number; stripePriceId: string } | null
     annual: { id: string; price: number; stripePriceId: string } | null
   }> = {}
@@ -20,6 +21,7 @@ export async function GET() {
       grouped[key] = {
         displayName: tier.displayName,
         features: tier.features,
+        minimumTermMonths: tier.minimumTermMonths,
         monthly: null,
         annual: null,
       }
