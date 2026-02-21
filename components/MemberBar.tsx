@@ -41,11 +41,10 @@ export function MemberBar() {
           dashboardItems.push({ icon: GraduationCap, label: 'Academy', href: '/academy/my-courses' })
         }
         if (access.complianceMember?.status === 'active') {
-          dashboardItems.push({ 
-            icon: Shield, 
-            label: 'Compliance+', 
-            href: '/complianceplus/dashboard',
-            badge: access.complianceMember.tier
+          dashboardItems.push({
+            icon: Shield,
+            label: 'Compliance+',
+            href: '/complianceplus/dashboard'
           })
         }
         if (access.bootcampAttendee) {
