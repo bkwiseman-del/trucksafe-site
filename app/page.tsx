@@ -614,7 +614,7 @@ export default function Homepage() {
               <h2 className="text-4xl font-black text-gray-900 mb-2">Latest Insights</h2>
               <p className="text-lg text-gray-600">Expert analysis on DOT compliance & regulatory updates</p>
             </div>
-            <a href="/articles" className="text-[#dd8157] font-semibold hover:text-[#c86d47] transition flex items-center gap-2">
+            <a href="/blog" className="text-[#dd8157] font-semibold hover:text-[#c86d47] transition flex items-center gap-2">
               View All Articles <ArrowRight className="w-4 h-4" />
             </a>
           </div>
@@ -646,7 +646,7 @@ export default function Homepage() {
                 slug: "drug-alcohol-testing-rates-2026"
               }
             ].map((post, idx) => (
-              <a key={idx} href={`/articles/${post.slug}`} className="group cursor-pointer block">
+              <a key={idx} href={`/post/${post.slug}`} className="group cursor-pointer block">
                 <div className="bg-gray-100 h-48 rounded-xl mb-4 group-hover:bg-gray-200 transition" />
                 <div className="text-sm font-semibold text-[#dd8157] uppercase tracking-wider mb-2">
                   {post.category}

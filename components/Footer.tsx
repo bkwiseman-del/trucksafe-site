@@ -54,7 +54,7 @@ export default function Footer() {
           <div>
             <h4 className="font-bold text-sm uppercase tracking-wider mb-4">Resources</h4>
             <ul className="space-y-2">
-              <li><a href="/articles" className="text-gray-400 hover:text-[#dd8157] transition text-sm">Articles</a></li>
+              <li><a href="/blog" className="text-gray-400 hover:text-[#dd8157] transition text-sm">Articles</a></li>
               <li><a href="/live" className="text-gray-400 hover:text-[#dd8157] transition text-sm">Trucksafe LIVE!</a></li>
               <li><a href="/shop" className="text-gray-400 hover:text-[#dd8157] transition text-sm">Shop</a></li>
             </ul>

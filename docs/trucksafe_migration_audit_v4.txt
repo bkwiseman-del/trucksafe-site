@@ -1,0 +1,1506 @@
+TRUCKSAFE MIGRATION AUDIT
+Wix to Next.js — Complete URL Inventory & Status Report
+Source: live trucksafe.com sitemap data | Version 4.0 | February 2026
+
+Legend
+Symbol
+
+Meaning
+
+Built
+
+Route already exists in Next.js repo
+
+Must Build
+
+Wix page exists with no matching Next.js route
+
+Redirect
+
+Wix URL needs a 301 redirect to a different Next.js URL
+
+Clarify
+
+Exists on both platforms — purpose needs confirmation
+
+Exclude
+
+Wix draft or copy page — do not migrate
+
+1. Critical Issues — Fix Before Launch
+1.1 Blog Post URL Mismatch (SHOWSTOPPER)
+All 206 Wix blog posts live at /post/[slug]. The Next.js repo has NO /post/ route — only
+/articles/[slug]. Without action, every article URL becomes a 404 on launch day.
+Option
+
+Approach
+
+SEO Impact
+
+A
+(Recommended)
+
+Build app/post/[slug]/page.tsx — preserve Wix URLs
+as canonical
+
+Zero — no redirects, no crawl delay,
+full SEO preserved
+
+B (Acceptable)
+
+Add 301 redirects: /post/:slug -> /articles/:slug in
+next.config.js
+
+Minor — redirects pass ~99% link
+equity but add latency
+
+C (Avoid)
+
+Do nothing
+
+CATASTROPHIC — 206 pages
+become 404s, all SEO value lost
+
+WARNING: Option A is strongly recommended. Preserving /post/[slug] means zero redirects and zero
+SEO risk.
+
+1.2 drug/alcohol-testing Category Slug Has a Literal Forward Slash
+The Wix blog category URL is: /blog/categories/drug/alcohol-testing. The forward slash is part of
+the slug, causing Next.js to interpret it as two nested route segments. This must be handled with
+an explicit redirect before any general :cat wildcard rule.
+Wix URL
+
+Problem
+
+Fix
+
+/blog/categories/drug/alcoholtesting
+
+Slash in slug breaks Next.js
+routing
+
+Redirect to /articles/categories/drugalcohol-testing — place BEFORE general
+:cat rule
+
+1.3 trucksafeconsulting.com Domain Redirect
+The old domain trucksafeconsulting.com has indexed /post/[slug] URLs in Google. These links
+will 404 after migration unless a domain-level 301 redirect is configured from
+trucksafeconsulting.com to trucksafe.com at the DNS/hosting level.
+
+2. Static Pages — Complete Inventory
+Source: trucksafe.com/pages-sitemap.xml
+Wix URL
+
+Next.js Route
+
+Status
+
+Notes
+
+/
+
+/
+
+Built
+
+Homepage
+
+/about
+
+/about
+
+Built
+
+/contact
+
+/contact
+
+Built
+
+/services
+
+/services
+
+Must Build
+
+/expertwitness
+
+/expertwitness
+
+Built
+
+/bootcamp
+
+/bootcamp
+
+Built
+
+/training
+
+/training
+
+Must Build
+
+/network
+
+/network
+
+Built
+
+/live
+
+/live
+
+Built
+
+/shop
+
+/shop
+
+Must Build
+
+Wix store; needs Next.js replacement
+
+/blog
+
+/articles
+
+Redirect
+
+/blog → /articles
+
+/on-demand-videos
+
+/on-demand-videos
+
+Must Build
+
+Video library page
+
+/elp
+
+/elp
+
+Must Build
+
+ELP enforcement page (separate from /elpdashboard)
+
+/elp-dashboard
+
+/elp-dashboard
+
+Clarify
+
+Exists on both Wix and Next.js — confirm
+content
+
+/newentrant
+
+/newentrant
+
+Must Build
+
+New Entrant program page
+
+/academy
+
+/academy
+
+Built
+
+/production
+
+/production
+
+Built
+
+/privacy
+
+/privacy
+
+Must Build
+
+/terms
+
+/terms
+
+Must Build
+
+/subscribe
+
+/subscribe
+
+Must Build
+
+Email subscribe page
+
+/members
+
+/dashboard
+
+Redirect
+
+/members → /dashboard (Wix member area)
+
+/improve-csa
+
+/improve-csa
+
+Must Build
+
+CSA improvement landing
+
+/auditreadiness
+
+/auditreadiness
+
+Must Build
+
+Audit readiness landing
+
+/truckingstartup
+
+/truckingstartup
+
+Must Build
+
+Trucking startup landing
+
+/am-i-regulated
+
+/am-i-regulated
+
+Must Build
+
+Interactive tool/landing
+
+/hazmat
+
+/hazmat
+
+Must Build
+
+Hazmat info page
+
+/eldt
+
+/eldt
+
+Must Build
+
+ELDT info page
+
+/nextgen
+
+/nextgen
+
+Must Build
+
+NextGen program page
+
+Hub page; Next.js only has sub-pages
+
+Exists on Wix; missing in Next.js
+
+Wix URL
+
+Next.js Route
+
+Status
+
+Notes
+
+/summit
+
+/summit
+
+Must Build
+
+Summit event page
+
+/driverreach
+
+/driverreach
+
+Must Build
+
+DriverReach partner page
+
+/ecapital
+
+/ecapital
+
+Must Build
+
+eCapital partner page
+
+/idelic
+
+/idelic
+
+Must Build
+
+Idelic partner page
+
+/nirvana
+
+/nirvana
+
+Must Build
+
+Nirvana partner page
+
+/trucksafeacademy
+
+/trucksafeacademy
+
+Must Build
+
+Academy hub/redirect
+
+/critical-acutedownload
+
+/critical-acutedownload
+
+Must Build
+
+Lead gen download
+
+/free-preview-content
+
+/free-preview-content
+
+Must Build
+
+Gated preview content
+
+/free-preview-sign-up
+
+/free-preview-sign-up
+
+Must Build
+
+Preview sign-up form
+
+/hazmat-preview
+
+/hazmat-preview
+
+Must Build
+
+Hazmat preview landing
+
+/hazmat-previewcontent
+
+/hazmat-previewcontent
+
+Must Build
+
+Hazmat gated content
+
+/home
+
+/
+
+Redirect
+
+/home → / (duplicate homepage)
+
+/pricing-plans/list
+
+/complianceplus
+
+Redirect
+
+Wix pricing → Compliance+
+
+/trucksafe-apparel
+
+/shop
+
+Redirect
+
+Apparel → Shop
+
+/course-reasonablesuspicion
+
+/course-reasonablesuspicion
+
+Must Build
+
+Course landing page
+
+/course-driverqualification
+
+/course-driverqualification
+
+Must Build
+
+Course landing page
+
+/course-hours-ofservice
+
+/course-hours-ofservice
+
+Must Build
+
+Course landing page
+
+/course-safetymanagers
+
+/course-safetymanagers
+
+Must Build
+
+Course landing page
+
+/course-drivers
+
+/course-drivers
+
+Must Build
+
+Course landing page
+
+/copy-of-free-previewcontent
+
+N/A
+
+Exclude
+
+Wix draft — do not migrate
+
+/copy-of-free-previewsign-up
+
+N/A
+
+Exclude
+
+Wix draft — do not migrate
+
+/copy-of-course-hoursof-service
+
+N/A
+
+Exclude
+
+Wix draft — do not migrate
+
+/copy-of-eldt
+
+N/A
+
+Exclude
+
+Wix draft — do not migrate
+
+3. Blog Posts — Complete Inventory
+Source: trucksafe.com/blog-posts-sitemap.xml — 239 posts. All at Wix URL pattern: /post/[slug].
+See Section 1.1 for action required.
+1. /post/how-dot-compliance-affects-mergers-acquisitions
+2. /post/dq-personnel-and-drug-alcohol-testing-files-understanding-the-distinction
+3. /post/wiseman-addresses-fleet-safety-compliance-at-freightwaves-fleet-summit
+4. /post/fmcsa-proposes-revisions-to-various-cdl-processes
+5. /post/compliance-theater-when-documentation-replaces-judgment
+6. /post/combating-distracted-driving-crafting-an-effective-policy
+7. /post/tackling-cargo-theft-and-cyber-threats-in-trucking
+8. /post/fmcsa-modifies-temporary-waiver-for-paper-medical-certificates-amid-nriitransition
+9. /post/trump-cracks-down-on-english-proficiency-among-truck-drivers-in-new-executiveorder
+10. /post/understanding-fmcsa-verifications-of-employment
+11. /post/is-your-fleet-audit-ready
+12. /post/fmcsa-proposes-pilot-programs-for-hours-of-service-flexibility-split-dutyperiods-and-sleeper-berth
+13. /post/keys-to-a-compliant-vehicle-maintenance-file
+14. /post/trucksafe-s-wiseman-discussed-nuclear-verdicts-more-on-the-freight-coachpodcast
+15. /post/what-should-fleets-expect-with-a-republican-administration-in-2025
+16. /post/understanding-fmcsa-s-oilfield-exemptions
+17. /post/fmcsa-proposing-to-remove-over-15-000-medical-examiners-from-nationalregistry
+18. /post/phmsa-contemplating-several-revisions-to-hazardous-materials-regulations
+19. /post/scotus-opens-the-door-for-truckers-to-sue-over-mislabeled-cbd-products
+20. /post/fmcsa-to-undertake-new-study-on-effectiveness-of-warning-devices-for-stoppedcmvs
+21. /post/fmcsa-soliciting-waiver-requests-to-reinstate-meal-rest-break-laws
+22. /post/fmcsa-amends-broker-freight-forwarder-financial-responsibility-rules
+23. /post/how-best-to-prioritize-compliance-issues-for-fleet-safety-teams
+24. /post/the-impact-of-fmcsa-clearinghouse-phase-2-and-other-crucial-updates-fromepisode-41-of-trucksafe-liv
+25. /post/trucksafe-s-wiseman-joins-the-armchair-attorney-to-discuss-elds-chevrondeference-and-more
+26. /post/fmcsa-updates-the-crash-preventability-determination-program-what-fleetsneed-to-know
+27. /post/federal-court-temporarily-halts-fmcsa-s-non-domiciled-cdl-rule
+28. /post/shifting-sands-of-independence-breaking-down-the-dol-s-new-independentcontractor-rule
+29. /post/5-lessons-from-a-terrible-crash
+30. /post/fmcsa-issues-rash-of-proposed-rules
+31. /post/fmcsa-administrator-to-resign-jan-26th
+32. /post/fmcsa-regulatory-update-key-takeaways-from-the-florida-trucking-associationsafety-summit
+33. /post/trucksafe-haul-launch-cutting-edge-managed-services-offering
+34. /post/fmcsa-nhtsa-propose-heavy-vehicle-automatic-emergency-brake-rule
+35. /post/top-5-legal-issues-impacting-fleets-in-2025-insights-from-trucksafe-live-ep45
+36. /post/adrienne-camire-appointed-as-new-fmcsa-acting-administrator
+37. /post/fmcsa-to-tighten-eld-self-certification-process
+38. /post/dot-proposes-adding-fentanyl-to-drug-testing-panel
+39. /post/fmcsa-flags-pennsylvania-for-non-domiciled-cdl-irregularities
+40. /post/trucksafe-s-wiseman-discusses-rule-changes-at-freightwaves-event
+41. /post/controlling-driver-log-falsifications
+42. /post/trucksafe-holds-4th-annual-fleet-compliance-bootcamp
+43. /post/fmcsa-tightens-rules-for-non-domiciled-cdls-in-wake-of-fatal-crashes
+44. /post/how-drivers-return-to-duty-following-a-drug-or-alcohol-violation
+
+45. /post/wiseman-joins-freightwaves-to-discuss-broker-liability
+46. /post/fmcsa-issues-temporary-waiver-for-nrii-transition-easing-cdl-medicalcertification-delays-for-motor
+47. /post/dispelling-5-common-dot-compliance-myths
+48. /post/u-s-senate-confirms-sean-duffy-as-secretary-of-transportation
+49. /post/what-trump-s-marijuana-rescheduling-executive-order-could-mean-for-trucking
+50. /post/fmcsa-issues-enforcement-policy-on-english-proficiency
+51. /post/how-reported-fleet-size-impacts-compliance
+52. /post/fmcsa-again-considering-substantial-changes-to-safety-ratings
+53. /post/trucksafe-launches-two-new-services-micro-audits-bootcamp-on-the-road
+54. /post/top-10-federal-developments-fleets-should-understand-heading-into-2026
+55. /post/top-critical-and-acute-violations-for-fleets-insights-and-solutions
+56. /post/wiseman-joins-freightwaves-to-discuss-the-drug-alcohol-clearinghouse
+57. /post/how-fleets-can-best-leverage-the-crash-preventability-determination-program
+58. /post/changes-in-store-for-cdl-medical-examiner-certification-process
+59. /post/chameleon-carriers-fraud-detection-and-fmcsa-s-evolving-data-strategy
+60. /post/what-you-need-to-know-about-the-clearinghouse-ii-roll-out-by-fmcsa
+61. /post/fmcsa-issues-new-guidance-clarifying-non-domiciled-cdl-final-rulerequirements
+62. /post/trump-enacts-regulatory-freeze-what-it-means-for-trucking
+63. /post/understanding-roadside-inspection-reports
+64. /post/compliance-myth-not-for-hire-means-not-regulated
+65. /post/advanced-guide-to-the-split-sleeper-berth-rule-maximizing-drivingflexibility-and-efficiency
+66. /post/2023-regulatory-year-in-review-2024-outlook
+67. /post/fmcsa-keeps-random-drug-alcohol-testing-rates-the-same-for-2026
+68. /post/preparing-for-roadside-inspections-a-comprehensive-guide-for-fleets-andcommercial-drivers
+69. /post/usdot-threatens-to-withhold-federal-funding-from-california-washington-newmexico-for-elp-enforce
+70. /post/cvsa-human-trafficking-awareness-week-and-what-your-drivers-need-to-know
+71. /post/arkansas-enacts-new-english-language-proficiency-law
+72. /post/fmcsa-cleans-house-3-000-cdl-schools-removed-from-the-training-providerregistry
+73. /post/spotlight-on-non-domiciled-cdls
+74. /post/when-are-drivers-eligible-for-a-16-hour-driving-window
+75. /post/fmcsa-to-pursue-additional-changes-to-the-dataqs-system
+76. /post/qualification-considerations-for-multiple-employer-drivers
+77. /post/trucksafe-s-brandon-wiseman-featured-by-fleetowner-in-article-on-2024regulatory-outlook
+78. /post/fmcsa-escalates-feud-with-california-withholds-160m-in-federal-funding
+79. /post/who-is-qualified-to-perform-dot-annual-and-brake-inspections
+80. /post/fmcsa-and-nhtsa-move-to-officially-withdraw-speed-limiter-mandate-for-heavytrucks
+81. /post/fmcsa-to-enhance-dataqs-appeal-process
+82. /post/navigating-the-overlap-federal-vs-state-motor-carrier-safety-regulations
+83. /post/5-things-fleets-can-do-today-to-significantly-reduce-risk
+84. /post/congressman-josh-brecheen-reintroduces-drive-act-to-oppose-federal-speedlimiter-mandate
+85. /post/cdl-drug-testing-faces-uncertainty-after-trump-executive-order
+86. /post/usdot-announces-new-initiatives-to-support-america-s-truck-drivers-in-2025
+87. /post/top-5-roadside-violations-how-to-avoid-them
+88. /post/drug-alcohol-testing-for-student-drivers
+89. /post/fmcsa-issues-final-rule-on-non-domiciled-cdls
+90. /post/federal-appeals-court-rules-claims-against-freight-broker-after-crash-arepreempted
+91. /post/compliance-theater-and-the-illusion-of-protection
+92. /post/understanding-fmcsa-changes-and-compliance-trends-insights-from-jack-vansteenburg
+93. /post/trucksafe-joins-ccj-to-discuss-impact-of-marijuana-rescheduling-for-trucking
+94. /post/trucksafe-launches-monthly-english-language-proficiency-elp-enforcementreport
+95. /post/trump-nominates-derek-barrs-as-fmcsa-administrator
+
+96. /post/fmcsa-to-void-over-15-000-driver-med-cards-and-remove-non-compliant-medicalexaminers-from-national
+97. /post/fmcsa-pushing-forward-with-safety-measurement-system-sms-changes-in-light-ofpublic-comments
+98. /post/year-in-review-2024-regulatory-highlights-and-2025-outlook-for-fleets
+99. /post/understanding-dot-road-tests
+100. /post/dot-compliance-for-small-vs-large-fleets
+101. /post/trucksafe-discusses-the-pitfalls-of-cbd-use-among-drivers-with-prepass
+102. /post/fmcsa-reignites-speed-limiter-proposal-for-larger-trucks
+103. /post/what-are-chameleon-carriers
+104. /post/who-is-subject-to-hazmat-registration-and-training-rules
+105. /post/5-reasons-to-consolidate-dot-s-and-how-to-do-it
+106. /post/risky-business-cbd-use-by-commercial-drivers
+107. /post/compliance-myth-10-year-employment-history
+108. /post/fmcsa-clarifies-key-brokerage-definitions
+109. /post/when-is-it-appropriate-for-drivers-to-claim-adverse-driving-conditionexemption
+110. /post/telematics-for-trucking-a-guide-to-choosing-the-right-solution
+111. /post/trucksafe-s-brandon-wiseman-joins-taking-the-hire-road
+112. /post/fmcsa-to-broaden-crash-preventability-determination-program
+113. /post/leveraging-the-onboarding-process-to-better-retain-drivers
+114. /post/fmcsa-issues-exemption-to-carriers-hauling-baby-formula
+115. /post/fmcsa-takes-first-step-in-establishing-apprenticeship-program
+116. /post/usdot-contemplates-electronic-recordkeeping-for-drug-alcohol-documents
+117. /post/fmcsa-again-declines-to-tackle-double-brokerage
+118. /post/trucksafe-addresses-top-hos-issues
+119. /post/applicability-of-federal-motor-carrier-regulations-to-passenger-operations
+120. /post/fmcsa-overhauls-clearinghouse-notifications
+121. /post/changes-in-store-for-the-drug-alcohol-clearinghouse
+122. /post/trucksafe-featured-on-taking-the-hire-road
+123. /post/fmcsa-to-eliminate-certificate-of-violations-requirement
+124. /post/usdot-approves-mouth-swabs-for-regulated-drug-screens
+125. /post/supreme-court-strikes-down-osha-vaccine-mandate-for-large-employers
+126. /post/trucksafe-s-brandon-wiseman-talks-driver-training-in-idelic-webinar
+127. /post/answering-eldt-questions
+128. /post/5-things-fleets-should-know-about-dot-audits
+129. /post/trucksafe-featured-on-haulin-notes-podcast
+130. /post/5-steps-to-improve-your-out-of-service-rates
+131. /post/understanding-dot-physical-exams-med-cards
+132. /post/what-property-brokers-must-know-about-their-role-in-highway-accidents
+133. /post/building-a-strong-fleet-safety-culture
+134. /post/fmcsa-seeking-comments-on-brokerage-definitions
+135. /post/fmcsa-warns-carriers-about-3g-network-sunset
+136. /post/fmcsa-declares-regional-emergency-due-to-midwest-bp-refinery-fire
+137. /post/fmcsa-deals-another-blow-to-hair-testing
+138. /post/top-5-personal-conveyance-mistakes
+139. /post/fmcsa-to-require-states-to-downgrade-cdls-due-to-drug-alcohol-violations
+140. /post/trucksafe-s-brandon-wiseman-joins-freightwaves-to-discuss-drug-alcoholtesting
+141. /post/trucksafe-discusses-the-safe-driver-apprenticeship-pilot-program
+142. /post/fmcsa-rule-changes-for-2023
+143. /post/compliance-myths-double-brokering-is-illegal
+144. /post/understanding-fmcsa-civil-penalties
+145. /post/the-mechanics-of-a-dot-audit-and-practical-tips-for-surviving-one
+146. /post/why-fleets-should-be-investing-in-dot-regulatory-training
+147. /post/spotlight-on-fleet-maintenance
+148. /post/trucksafe-addresses-personal-conveyance-use-in-heavy-duty-trucking-magazine
+149. /post/fmcsa-mulling-tweaks-to-eld-rules
+150. /post/the-elusive-15-day-mvr-rule
+151. /post/how-to-improve-your-csa-scores
+152. /post/what-to-do-after-a-cmv-accident
+153. /post/what-is-the-split-sleeper-berth-rule
+
+154. /post/trucksafe-joins-heavy-duty-trucking-to-discuss-potential-eld-changes
+155. /post/breaking-scotus-denies-review-in-ab5-case
+156. /post/trucksafe-live-live-from-mce21
+157. /post/trucksafe-addresses-fleet-safety-metrics-in-heavy-duty-trucking-magazine
+158. /post/when-trucking-regulations-run-amok
+159. /post/5-enforcement-metrics-carriers-must-track
+160. /post/covid-19-emergency-hos-exemption-lapses
+161. /post/trucksafe-joins-the-haulin-notes-podcast-to-discuss-the-mcs-150
+162. /post/trucksafe-joins-the-transportation-logistics-clubhouse-podcast
+163. /post/when-should-trucking-companies-hire-a-dedicated-safety-director
+164. /post/the-data-s-clear-nuclear-verdicts-are-growing-worse-but-the-fight-againstthem-is-finding-muscle
+165. /post/trucksafe-joins-prepass-to-discuss-common-roadside-violations
+166. /post/how-the-infrastructure-bill-will-impact-trucking
+167. /post/dot-proposes-to-allow-oral-fluid-drug-testing
+168. /post/what-is-the-unified-carrier-registration-ucr-program
+169. /post/trucksafe-discusses-proposed-csa-changes-with-hdt-talks-trucking
+170. /post/what-fleets-need-to-know-about-entry-level-driver-training-2022
+171. /post/what-is-the-inspection-selection-system
+172. /post/how-carriers-can-protect-themselves-against-cargo-loss-damage
+173. /post/5-common-roadside-violations-how-to-avoid-them
+174. /post/2022-in-review-top-trucksafe-content
+175. /post/trucksafe-live-the-intersection-of-driver-recruiting-and-compliance
+176. /post/compliance-myths-required-truck-markings
+177. /post/fmcsa-withdraws-third-party-and-out-of-state-cdl-testing-rulemakings
+178. /post/understanding-the-pre-employment-screening-program-psp
+179. /post/fmcsa-to-require-periodic-inspections-of-rear-impact-guards
+180. /post/trucksafe-s-brandon-wiseman-joins-the-safetyfm-podcast
+181. /post/fmcsa-contemplating-vehicle-identification-tags
+182. /post/trucksafe-joins-truckers-news-to-discuss-personal-conveyance
+183. /post/what-prompts-a-dot-compliance-audit
+184. /post/minimizing-exposure-through-driver-qualification
+185. /post/fmcsa-proposes-substantial-revisions-to-its-safety-measurement-system-sms
+186. /post/10-things-you-should-know-about-entry-level-driver-training
+187. /post/fmcsa-to-allow-greater-flexibility-for-installation-of-interior-cmv-safetytechnology
+188. /post/fmcsa-provides-details-on-18-21-year-old-apprenticeship-program
+189. /post/fmcsa-proposes-to-scale-back-regulatory-relief-during-declared-emergencies
+190. /post/trucksafe-joins-safe-as-truck-podcast-to-discuss-hos
+191. /post/fmcsa-to-increase-civil-penalties-for-regulatory-violations
+192. /post/fmcsa-to-implement-operating-authority-exemption-for-providers-ofrecreational-activities
+193. /post/ohio-doe-seeks-exemption-from-eldt-rule-for-school-bus-drivers
+194. /post/fmcsa-evaluating-continued-need-for-covid-emergency-declaration
+195. /post/5-things-to-understand-about-new-entrant-audits
+196. /post/fmcsa-again-extends-covid-19-emergency-exemption
+197. /post/fmcsa-revives-discussion-on-mandatory-state-passenger-cmv-inspections
+198. /post/fmcsa-extends-covid-19-national-emergency-declaration
+199. /post/trucksafe-tackles-compliance-myths-on-tow-business-podcast
+200. /post/how-the-dot-distinguishes-interstate-from-intrastate-commerce
+201. /post/5-common-eld-pitfalls-and-how-to-avoid-them
+202. /post/fmcsa-releases-spring-regulatory-agenda
+203. /post/how-to-pass-an-fmcsa-new-entrant-audit
+204. /post/what-is-a-cmv-and-why-does-it-matter
+205. /post/5-tips-for-a-successful-dataqs-appeal
+206. /post/spotlight-on-dot-agricultural-exemptions
+207. /post/5-ways-to-drastically-improve-your-dot-safety-program
+208. /post/fmcsa-proposes-under-21-commercial-driver-pilot-program
+209. /post/upgrading-your-dot-safety-rating
+210. /post/fmcsa-issues-emergency-fmcsr-exemption-for-certain-fuel-transporters
+211. /post/hours-of-service-rule-changes-go-into-effect-despite-federal-court-challenge
+212. /post/what-is-a-dot-license
+
+213.
+214.
+215.
+216.
+217.
+218.
+219.
+220.
+221.
+222.
+223.
+224.
+225.
+226.
+227.
+228.
+229.
+230.
+231.
+232.
+233.
+234.
+235.
+236.
+237.
+238.
+239.
+
+/post/fmcsa-extends-and-expands-covid-19-emergency-declaration
+/post/understanding-the-driver-vehicle-inspection-report-dvir-process
+/post/who-needs-a-cdl-a-primer-on-commercial-drivers-licenses
+/post/trucksafe-offers-insight-on-fleet-safety-culture
+/post/the-case-for-mock-dot-audits
+/post/clearinghouse
+/post/what-is-a-dq-file-and-what-must-it-include
+/post/what-you-should-know-about-personal-conveyance
+/post/8-essential-steps-to-prepare-for-a-dot-audit
+/post/fmcsa-proposes-to-eliminate-annual-certificate-of-violations-requirement
+/post/5-critical-questions-to-ask-about-your-eld
+/post/dot-oig-identifies-gaps-in-fmcsa-s-cdl-program-oversight
+/post/who-s-exempt-from-the-eld-requirement
+/post/protecting-your-dot-safety-rating
+/post/preparing-for-international-roadcheck-2021
+/post/when-is-a-dot-post-accident-drug-and-alcohol-test-required
+/post/what-is-a-dot-recordable-accident
+/post/no-slowing-down-for-dot-s-burst-in-offsite-audits
+/post/controversial-invest-in-america-act-passes-house-moves-to-senate
+/post/dot-short-haul-exemption-explained
+/post/fmcsa-again-extends-but-modifies-emergency-declaration
+/post/fmcsa-coordinating-with-states-on-colonial-pipeline-exemptions
+/post/trucksafe-in-the-news
+/post/5-surefire-ways-to-improve-your-sms-scores
+/post/get-ready-for-the-new-dot-entry-level-driver-training
+/post/fmcsa-proposes-pilot-program-to-test-14-hour-pause
+/post/how-are-csa-scores-calculated
+
+4. Store Products — Complete Inventory
+Source: trucksafe.com/store-products-sitemap.xml — 24 products at /product-page/[slug].
+The Next.js repo has a /shop route but no product detail pages. Decision needed: build native
+shop, redirect to external store, or keep Wix store temporarily.
+#
+
+Wix Product URL
+
+Status
+
+1
+
+/product-page/english-language-proficiency-elp-assessment-pack
+
+Must Build or Redirect
+
+2
+
+/product-page/certificate-of-violations-annual-review
+
+Must Build or Redirect
+
+3
+
+/product-page/vehicle-inspector-qualification-certificate
+
+Must Build or Redirect
+
+4
+
+/product-page/vehicle-file-cover-sheet-service-chart
+
+Must Build or Redirect
+
+5
+
+/product-page/am-i-regulated-flow-chart
+
+Must Build or Redirect
+
+6
+
+/product-page/hos-record-for-first-time-or-intermittent-drivers
+
+Must Build or Redirect
+
+7
+
+/product-page/new-entrant-bundle
+
+Must Build or Redirect
+
+8
+
+/product-page/drug-alcohol-policy-for-cdl-drivers
+
+Must Build or Redirect
+
+9
+
+/product-page/accident-register
+
+Must Build or Redirect
+
+10
+
+/product-page/driver-consent-to-limited-clearinghouse-queries
+
+Must Build or Redirect
+
+11
+
+/product-page/18-21-apprenticeship-program-package
+
+Must Build or Redirect
+
+12
+
+/product-page/driver-vehicle-inspection-report-dvir
+
+Must Build or Redirect
+
+13
+
+/product-page/driver-qualification-bundle
+
+Must Build or Redirect
+
+14
+
+/product-page/road-test-certificate
+
+Must Build or Redirect
+
+15
+
+/product-page/ebook-dot-compliance-the-basics
+
+Must Build or Redirect
+
+16
+
+/product-page/longer-combination-vehicle-training-certificate
+
+Must Build or Redirect
+
+17
+
+/product-page/driver-handbook-property-carriers
+
+Must Build or Redirect
+
+18
+
+/product-page/annual-vehicle-inspection-report
+
+Must Build or Redirect
+
+19
+
+/product-page/driver-application
+
+Must Build or Redirect
+
+20
+
+/product-page/monthly-timecard-for-short-haul-drivers
+
+Must Build or Redirect
+
+21
+
+/product-page/driver-log
+
+Must Build or Redirect
+
+22
+
+/product-page/driver-file-cover-sheet-checklist
+
+Must Build or Redirect
+
+23
+
+/product-page/safety-performance-history-request
+
+Must Build or Redirect
+
+24
+
+/product-page/fmcsa-audit-readiness-guide
+
+Must Build or Redirect
+
+5. Blog Categories
+Source: trucksafe.com/blog-categories-sitemap.xml — 15 categories.
+Wix Category URL
+
+Proposed Next.js URL
+
+/blog/categories/trucksafe-live
+
+/articles/categories/trucksafelive
+
+/blog/categories/generalcompliance
+
+/articles/categories/generalcompliance
+
+/blog/categories/breaking
+
+/articles/categories/breaking
+
+/blog/categories/driverqualification
+
+/articles/categories/driverqualification
+
+/blog/categories/new-entrants
+
+/articles/categories/newentrants
+
+/blog/categories/agency-news
+
+/articles/categories/agencynews
+
+/blog/categories/trucksafe
+
+/articles/categories/trucksafe
+
+/blog/categories/compliancemyths
+
+/articles/categories/compliancemyths
+
+/blog/categories/hours-ofservice
+
+/articles/categories/hours-ofservice
+
+/blog/categories/vehiclemaintenance
+
+/articles/categories/vehiclemaintenance
+
+/blog/categories/hazmat
+
+/articles/categories/hazmat
+
+/blog/categories/csa-safetyratings
+
+/articles/categories/csa-safetyratings
+
+/blog/categories/auditsenforcement
+
+/articles/categories/auditsenforcement
+
+/blog/categories/dot-registration
+
+/articles/categories/dotregistration
+
+/blog/categories/drug/alcoholtesting
+
+/articles/categories/drugalcohol-testing
+
+Notes
+
+SPECIAL: literal slash in slug - normalize to
+drug-alcohol-testing
+
+6. Bootcamp Event Pages
+Source: trucksafe.com/event-pages-sitemap.xml — 5 events at /event-details/[slug].
+Wix Event URL
+
+Status
+
+/event-details/fleet-compliance-bootcamp-fall-2026
+
+Future - Must Build
+
+/event-details/fleet-compliance-bootcamp-fall-2025
+
+Past - Archive/Redirect to /bootcamp
+
+/event-details/fleet-compliance-bootcamp-fall-2024
+
+Past - Archive/Redirect to /bootcamp
+
+/event-details/fleet-compliance-bootcamp-fall-2023
+
+Past - Archive/Redirect to /bootcamp
+
+/event-details/fleet-compliance-bootcamp-spring-2023
+
+Past - Archive/Redirect to /bootcamp
+
+7. Pricing Plans
+Source: trucksafe.com/pricing-plans-sitemap.xml — 1 page.
+Wix URL
+
+Next.js Route
+
+Action
+
+/pricing-plans/list
+
+/complianceplus
+
+Redirect: /pricing-plans/list ->
+/complianceplus
+
+8. Next.js Routes with No Wix Equivalent
+These are new features being introduced in the migration — they have no existing Wix
+counterpart.
+Next.js Route
+
+Purpose
+
+Status
+
+/dashboard
+
+Member dashboard hub
+
+Built
+
+/profile
+
+User profile
+
+Built
+
+/settings
+
+Account settings
+
+Built
+
+/login
+
+Authentication
+
+Built
+
+/signup
+
+Registration
+
+Built
+
+/complianceplus
+
+Compliance+ landing
+
+Built
+
+/complianceplus/checkout
+
+Subscription checkout
+
+Built
+
+/complianceplus/success
+
+Post-checkout page
+
+Built
+
+/network/forums
+
+Community forums hub
+
+Built
+
+/network/forums/[slug]
+
+Individual forum
+
+Built
+
+/network/forums/[slug]/[postId]
+
+Forum post
+
+Built
+
+/network/members
+
+Member directory
+
+Built
+
+/articles
+
+Blog index (replaces /blog)
+
+Built
+
+/live/[slug]
+
+LIVE! episode pages
+
+Built
+
+/admin
+
+Admin dashboard
+
+Built
+
+/admin/users
+
+User management
+
+Built
+
+/admin/users/[id]
+
+Individual user admin
+
+Built
+
+/complianceplus/dashboard
+
+Subscriber portal
+
+Must Build
+
+/complianceplus/webinars
+
+Subscriber webinars
+
+Must Build
+
+/complianceplus/resources
+
+Subscriber resources
+
+Must Build
+
+/complianceplus/consulting
+
+Subscriber consulting
+
+Must Build
+
+/portal
+
+Client portal (full section)
+
+Must Build
+
+/bootcamp/attendee
+
+Bootcamp attendee portal
+
+Must Build
+
+/bootcamp/alumni
+
+Bootcamp alumni portal
+
+Must Build
+
+/reset-password
+
+Password reset flow
+
+Must Build
+
+/verify-email
+
+Email verification
+
+Must Build
+
+9. Recommended next.config.js Redirects
+Order matters: specific rules must come before general wildcard rules.
+async redirects() {
+return [
+// drug/alcohol MUST come before general :cat rule
+{
+source: '/blog/categories/drug/alcohol-testing',
+destination:
+'/articles/categories/drug-alcohol-testing',
+permanent: true,
+},
+{ source:
+'/blog', destination: '/articles', permanent: true },
+{ source:
+'/blog/categories/:cat', destination: '/articles/categories/:cat', permanent: true },
+// Option B only (omit if building app/post/[slug]/page.tsx):
+// { source:
+'/post/:slug', destination: '/articles/:slug', permanent: true },
+{ source: '/home',
+destination: '/', permanent: true },
+{ source: '/pricing-plans/list', destination:
+'/complianceplus', permanent: true },
+{ source: '/trucksafe-apparel', destination:
+'/shop', permanent: true },
+{ source: '/members', destination: '/dashboard',
+permanent: true },
+]; },
+
+10. Prioritized Pre-Launch Checklist
+P0 — Showstoppers (fix before any launch)
+#
+
+Task
+
+Done
+
+1
+
+Build app/post/[slug]/page.tsx OR add /post -> /articles redirects
+
+[]
+
+2
+
+Add drug/alcohol-testing category redirect (before :cat wildcard)
+
+[]
+
+3
+
+Configure domain 301: trucksafeconsulting.com -> trucksafe.com
+
+[]
+
+4
+
+Build /articles as full blog index with content, filters, pagination
+
+[]
+
+5
+
+Add /blog/categories/:cat -> /articles/categories/:cat redirects
+
+[]
+
+6
+
+Build /privacy and /terms pages
+
+[]
+
+7
+
+Confirm /elp vs /elp-dashboard — are these different pages?
+
+[]
+
+P1 — High Priority (launch week)
+#
+
+Task
+
+Done
+
+1
+
+Build /training page
+
+[]
+
+2
+
+Build /services hub page
+
+[]
+
+3
+
+Build /on-demand-videos page
+
+[]
+
+4
+
+Build /newentrant page
+
+[]
+
+5
+
+Build /elp page
+
+[]
+
+6
+
+Build /shop and /product-page/[slug] routes (or redirect to external)
+
+[]
+
+7
+
+Build /subscribe page
+
+[]
+
+8
+
+Implement force password reset for migrated Wix members
+
+[]
+
+9
+
+Build /reset-password and /verify-email routes
+
+[]
+
+P2 — Important (Month 1)
+#
+
+Task
+
+Done
+
+1
+
+Build all 5 course landing pages (/course-reasonable-suspicion, etc.)
+
+[]
+
+2
+
+Build partner pages (/driverreach, /ecapital, /idelic, /nirvana)
+
+[]
+
+3
+
+Build conversion landing pages (/improve-csa, /auditreadiness, /truckingstartup, /am-iregulated)
+
+[]
+
+4
+
+Build /hazmat, /eldt, /nextgen, /summit pages
+
+[]
+
+5
+
+Build /critical-acute-download and gated content pages
+
+[]
+
+6
+
+Build /complianceplus/dashboard, /webinars, /resources, /consulting
+
+[]
+
+#
+
+Task
+
+Done
+
+7
+
+Handle bootcamp event pages (archive past, build future)
+
+[]
+
+P3 — Post-Launch
+#
+
+Task
+
+Done
+
+1
+
+Build full /portal (Client Portal section)
+
+[]
+
+2
+
+Build /bootcamp/attendee and /bootcamp/alumni portals
+
+[]
+
+3
+
+Build /free-preview-content, /free-preview-sign-up, /hazmat-preview pages
+
+[]
+
+4
+
+Verify no inbound links to 'copy-of-' pages before excluding them
+
+[]
+
+5
+
+Submit updated sitemap to Google Search Console after DNS cutover
+
+[]
+
+6
+
+Monitor GSC for crawl errors 30 days post-launch
+
+[]
+
+11. Summary Counts
+Category
+
+Total Wix URLs
+
+Built in Next.js
+
+Must Build/Redirect
+
+Static Pages
+
+51
+
+8
+
+32 build + 5 redirects
+
+Blog Posts
+
+239
+
+0 (route missing)
+
+All 206 need route or redirect
+
+Blog Categories
+
+15
+
+0
+
+15 need routes
+
+Store Products
+
+24
+
+0
+
+24 need routes or redirects
+
+Event Pages
+
+5
+
+0
+
+1 future (build), 4 past
+(redirect)
+
+Pricing Plans
+
+1
+
+0
+
+1 redirect
+
+Next.js New Routes
+
+27 new
+
+17 built
+
+10 must build
+
+

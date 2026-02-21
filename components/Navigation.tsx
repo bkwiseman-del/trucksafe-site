@@ -64,7 +64,7 @@ export default function Navigation() {
                   </Link>
                 </div>
               </div>
-              <Link href="/articles" className="text-sm font-medium text-gray-700 hover:text-[#dd8157] transition">
+              <Link href="/blog" className="text-sm font-medium text-gray-700 hover:text-[#dd8157] transition">
                 Articles
               </Link>
             </div>
